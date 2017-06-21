@@ -14,8 +14,9 @@ PM> Install-Package Dse.Graph
 
 ## License
 
-Copyright 2016-2017 DataStax
+Copyright 2017 DataStax
 
 http://www.datastax.com/terms/datastax-dse-driver-license-terms
 
 [dse]: http://www.datastax.com/products/datastax-enterprise
+[nuget]: https://www.nuget.org/packages/Dse.Graph
