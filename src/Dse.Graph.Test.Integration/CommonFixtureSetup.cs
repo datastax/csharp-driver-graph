@@ -45,7 +45,7 @@ namespace Dse.Graph.Test.Integration
             using (var cluster = DseCluster.Builder().AddContactPoint(TestClusterManager.InitialContactPoint).Build())
             {
                 var session = cluster.Connect();
-                CreateDefaultGraph(session);
+                //CreateDefaultGraph(session);
             }
 
         }
@@ -63,7 +63,7 @@ namespace Dse.Graph.Test.Integration
         public void TearDownTestSuite()
         {
             // this method is executed once after all the fixtures have completed execution
-            TestClusterManager.TryRemove();
+            //TestClusterManager.TryRemove();
         }
     }
 }

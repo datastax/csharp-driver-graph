@@ -46,8 +46,19 @@ namespace Dse.Graph
         {
             foreach (var graphNode in rs)
             {
-                yield return new Traverser(_reader.ToObject(JToken.Parse(graphNode.ToString())));
+                yield return new Traverser(AdaptGraphNode(graphNode));
             }
+        }
+
+        private object AdaptGraphNode(GraphNode graphNode)
+        {
+            if (graphNode.IsScalar)
+            {
+                return graphNode.To<object>();
+            }
+            // Avoid double parsing when TINKERPOP-1696 is implemented
+            var json = graphNode.ToString();
+            return _reader.ToObject(JToken.Parse(json));
         }
     }
 }
