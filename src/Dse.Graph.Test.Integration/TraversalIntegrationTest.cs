@@ -1,14 +1,17 @@
-﻿using System;
+﻿//
+//  Copyright (C) 2017 DataStax, Inc.
+//
+//  Please see the license for details:
+//  http://www.datastax.com/terms/datastax-dse-driver-license-terms
+//
+
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using Gremlin.Net.Structure;
 using NUnit.Framework;
 
 namespace Dse.Graph.Test.Integration
 {
-    [TestFixture]
     public class TraversalIntegrationTest : BaseIntegrationTest
     {
         [Test]

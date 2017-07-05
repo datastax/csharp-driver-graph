@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿//
+//  Copyright (C) 2017 DataStax, Inc.
+//
+//  Please see the license for details:
+//  http://www.datastax.com/terms/datastax-dse-driver-license-terms
+//
+
 using NUnit.Framework;
 
 namespace Dse.Graph.Test.Unit
@@ -11,15 +13,9 @@ namespace Dse.Graph.Test.Unit
     public class TraversalUnitTest
     {
         [Test]
-        public void Json_Tests()
+        public void Sample_Test()
         {
-            dynamic result = JObject.Parse("{\"prop1\": \"val\", \"prop2\": 2, \"@type\": \"type1\"}");
-            string prop1 = result.prop1;
-            int prop2 = result.prop2;
-            string type = result["@type"];
-            Assert.AreEqual(prop1, "val");
-            Assert.AreEqual(prop2, 2);
-            Assert.AreEqual(type, "type1");
+            
         }
     }
 }

@@ -1,6 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿//
+//  Copyright (C) 2017 DataStax, Inc.
+//
+//  Please see the license for details:
+//  http://www.datastax.com/terms/datastax-dse-driver-license-terms
+//
+
 using Dse.Graph.Test.Integration.TestClusterManagement;
 using NUnit.Framework;
 
@@ -42,10 +46,14 @@ namespace Dse.Graph.Test.Integration
         public void SetupTestSuite()
         {
             // this method is executed once BEFORE all the fixtures are started
+            TestClusterManager.CreateNew(1, new TestClusterOptions
+            {
+                Workloads = new [] { "graph" }
+            });
             using (var cluster = DseCluster.Builder().AddContactPoint(TestClusterManager.InitialContactPoint).Build())
             {
                 var session = cluster.Connect();
-                //CreateDefaultGraph(session);
+                CreateDefaultGraph(session);
             }
 
         }
@@ -63,7 +71,7 @@ namespace Dse.Graph.Test.Integration
         public void TearDownTestSuite()
         {
             // this method is executed once after all the fixtures have completed execution
-            //TestClusterManager.TryRemove();
+            TestClusterManager.TryRemove();
         }
     }
 }

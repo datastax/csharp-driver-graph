@@ -1,6 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿//
+//  Copyright (C) 2017 DataStax, Inc.
+//
+//  Please see the license for details:
+//  http://www.datastax.com/terms/datastax-dse-driver-license-terms
+//
+
+using Dse.Graph.Test.Integration.TestClusterManagement;
 using NUnit.Framework;
 
 namespace Dse.Graph.Test.Integration
@@ -8,7 +13,6 @@ namespace Dse.Graph.Test.Integration
     [TestFixture]
     public abstract class BaseIntegrationTest
     {
-        protected const string ContactPoint = "172.16.56.1";
         public const string DefaultGraphName = "graph1";
 
         protected IDseCluster Cluster { get; set; }
@@ -17,9 +21,9 @@ namespace Dse.Graph.Test.Integration
 
         [OneTimeSetUp]
         public void BaseOneTimeSetUp()
-        {
+        {   
             Cluster = DseCluster.Builder()
-                .AddContactPoint(ContactPoint)
+                .AddContactPoint(TestClusterManager.InitialContactPoint)
                 .WithGraphOptions(new GraphOptions().SetName(DefaultGraphName))
                 .Build();
             Session = Cluster.Connect();
