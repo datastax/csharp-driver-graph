@@ -18,28 +18,52 @@ namespace Dse.Graph
 {
     internal class DseRemoteConnection : IRemoteConnection
     {
+        private static readonly GraphSONReader Reader = new GraphSONReader();
+        internal static readonly GraphSONWriter Writer = new GraphSONWriter();
+        
+        internal const string GraphLanguage = "bytecode-json";
+        
+        private readonly GraphOptions _graphOptions;
         private readonly IDseSession _session;
-        private readonly GraphSONReader _reader;
-        private readonly GraphSONWriter _writer;
-        private const string GraphLanguage = "bytecode-json";
 
-        internal DseRemoteConnection(IDseSession session)
+        internal DseRemoteConnection(IDseSession session, GraphOptions graphOptions)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
-            _reader = new GraphSONReader();
-            _writer = new GraphSONWriter();
+            _graphOptions = graphOptions;
         }
 
         public async Task<ITraversal<TStart, TEnd>> SubmitAsync<TStart, TEnd>(Bytecode bytecode)
         {
-            var query = _writer.WriteObject(bytecode);
-            var graphStatement = new SimpleGraphStatement(query).SetGraphLanguage(GraphLanguage);
+            var query = Writer.WriteObject(bytecode);
+            var graphStatement = CreateStatement(query, _graphOptions);
             var rs = await _session.ExecuteGraphAsync(graphStatement);
             var graphTraversal = new GraphTraversal<TStart, TEnd>
             {
                 Traversers = GetTraversers(rs)
             };
             return graphTraversal;
+        }
+
+        internal static IGraphStatement CreateStatement(string query, GraphOptions graphOptions)
+        {
+            var graphStatement = new SimpleGraphStatement(query).SetGraphLanguage(GraphLanguage);
+            if (graphOptions == null)
+            {
+                return graphStatement;
+            }
+            graphStatement
+                .SetGraphSource(graphOptions.Source)
+                .SetGraphName(graphOptions.Name)
+                .SetReadTimeoutMillis(graphOptions.ReadTimeoutMillis);
+            if (graphOptions.ReadConsistencyLevel != null)
+            {
+                graphStatement.SetGraphReadConsistencyLevel(graphOptions.ReadConsistencyLevel.Value);
+            }
+            if (graphOptions.WriteConsistencyLevel != null)
+            {
+                graphStatement.SetGraphWriteConsistencyLevel(graphOptions.WriteConsistencyLevel.Value);
+            }
+            return graphStatement;
         }
 
         private IEnumerable<Traverser> GetTraversers(GraphResultSet rs)
@@ -58,7 +82,7 @@ namespace Dse.Graph
             }
             // Avoid double parsing when TINKERPOP-1696 is implemented
             var json = graphNode.ToString();
-            return _reader.ToObject(JToken.Parse(json));
+            return Reader.ToObject(JToken.Parse(json));
         }
     }
 }
