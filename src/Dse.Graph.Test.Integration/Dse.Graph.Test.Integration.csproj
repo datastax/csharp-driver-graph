@@ -24,6 +24,11 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Gremlin.Net">
+      <HintPath>..\..\..\temp\Gremlin.Net.v3.2.5-preview1\Gremlin.Net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 </Project>
