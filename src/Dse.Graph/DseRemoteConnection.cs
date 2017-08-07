@@ -76,13 +76,9 @@ namespace Dse.Graph
 
         private object AdaptGraphNode(GraphNode graphNode)
         {
-            if (graphNode.IsScalar)
-            {
-                return graphNode.To<object>();
-            }
-            // Avoid double parsing when TINKERPOP-1696 is implemented
-            var json = graphNode.ToString();
-            return Reader.ToObject(JToken.Parse(json));
+            // Avoid using conversion to JToken TINKERPOP-1696 is implemented
+            var json = (JToken) graphNode.GetRaw();
+            return Reader.ToObject(json);
         }
     }
 }
