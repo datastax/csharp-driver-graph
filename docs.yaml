@@ -1,0 +1,22 @@
+title: DataStax Enterprise C# Driver Extensions for DSE Graph
+summary: DataStax Enterprise C# Driver Extensions for DSE Graph
+theme:    datastax
+sections:
+  - title:    Getting started
+    prefix:   /getting-started
+    type:     markdown
+    files:    'doc/getting-started/**/*.md'
+links:
+  - title: Code
+    href:  https://github.com/datastax/csharp-dse-graph/
+  - title: Issues
+    href:  https://datastax-oss.atlassian.net/projects/CSHARP/issues
+  - title: Mailing List
+    href:  https://groups.google.com/a/lists.datastax.com/forum/#!forum/csharp-driver-user
+  - title: Slack Channel
+    href:  https://academy.datastax.com/slack
+  - title: Nuget Package
+    href:  https://www.nuget.org/packages/Dse.Graph
+versions:
+  - name: '1.0'
+    ref: 'master'
