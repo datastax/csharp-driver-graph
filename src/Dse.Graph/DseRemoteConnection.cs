@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dse.Geometry;
+using Dse.Graph.Serialization;
 using Gremlin.Net.Process.Remote;
 using Gremlin.Net.Process.Traversal;
 using Gremlin.Net.Structure.IO.GraphSON;
@@ -18,8 +20,16 @@ namespace Dse.Graph
 {
     internal class DseRemoteConnection : IRemoteConnection
     {
-        private static readonly GraphSONReader Reader = new GraphSONReader();
-        internal static readonly GraphSONWriter Writer = new GraphSONWriter();
+        private static readonly ITypeSerializer[] CustomSerializers =
+        {
+            new TypeSerializer<Point>("dse", "Point", Point.Parse)
+        };
+        
+        private static readonly GraphSONReader Reader = new GraphSONReader(
+            CustomSerializers.ToDictionary(s => s.FullTypeName, s => (IGraphSONDeserializer)s));
+
+        internal static readonly GraphSONWriter Writer = new GraphSONWriter(
+            CustomSerializers.ToDictionary(s => s.Type, s => (IGraphSONSerializer)s));
         
         internal const string GraphLanguage = "bytecode-json";
         
