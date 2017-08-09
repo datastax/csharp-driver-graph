@@ -22,14 +22,23 @@ namespace Dse.Graph
     {
         private static readonly ITypeSerializer[] CustomSerializers =
         {
-            new TypeSerializer<Point>("dse", "Point", Point.Parse)
+            new DurationSerializer(),
+            new TypeSerializer<LocalDate>("gx", "LocalDate", LocalDate.Parse),
+            new TypeSerializer<LocalTime>("gx", "LocalTime", LocalTime.Parse),
+            new TypeSerializer<Point>("dse", "Point", Point.Parse),
+            new TypeSerializer<LineString>("dse", "LineString", LineString.Parse),
+            new TypeSerializer<Polygon>("dse", "Polygon", Polygon.Parse),
+            new ByteArraySerializer(),
+            new DateTimeOffsetSerializer("g", "Timestamp"),
+            new DateTimeOffsetSerializer("gx", "Instant")
         };
         
         private static readonly GraphSONReader Reader = new GraphSONReader(
             CustomSerializers.ToDictionary(s => s.FullTypeName, s => (IGraphSONDeserializer)s));
 
         internal static readonly GraphSONWriter Writer = new GraphSONWriter(
-            CustomSerializers.ToDictionary(s => s.Type, s => (IGraphSONSerializer)s));
+            CustomSerializers.GroupBy(s => s.Type).Select(g => g.First())
+                             .ToDictionary(s => s.Type, s => (IGraphSONSerializer) s));
         
         internal const string GraphLanguage = "bytecode-json";
         

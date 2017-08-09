@@ -7,10 +7,10 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Dse.Geometry;
 using Dse.Graph.Test.Integration.TestClusterManagement;
-using Gremlin.Net.Process.Traversal;
 using Gremlin.Net.Structure;
 using NUnit.Framework;
 
@@ -21,9 +21,18 @@ namespace Dse.Graph.Test.Integration
         private static readonly Tuple<string, object>[] PropertyItems =
         {
             Tuple.Create<string, object>("Float", 3.1415f),
-            Tuple.Create<string, object>("Point", new Point(0, 1))
+            Tuple.Create<string, object>("Duration", new Duration(0, 0, 123000000L)),
+            Tuple.Create<string, object>("Date", new LocalDate(1999, 12, 31)),
+            Tuple.Create<string, object>("Time", new LocalTime(12, 50, 45, 0)),
+            Tuple.Create<string, object>("Timestamp", DateTimeOffset.Parse("2017-08-09 17:21:29+00:00")),
+            Tuple.Create<string, object>("Blob", new byte[]{ 1, 2, 3 }),
+            Tuple.Create<string, object>("Point", new Point(0, 1)),
+            Tuple.Create<string, object>("Linestring", 
+                new LineString(new Point(0, 0), new Point(0, 1), new Point(1, 1))),
+            Tuple.Create<string, object>("Polygon", 
+                new Polygon(new Point(-10, 10), new Point(10, 0), new Point(10, 10), new Point(-10, 10)))
         };
-        
+
         [OneTimeSetUp]
         public void FixtureSetup()
         {
@@ -92,7 +101,14 @@ namespace Dse.Graph.Test.Integration
         }
 
         [TestCase("Float")]
+        [TestCase("Duration")]
+        [TestCase("Date")]
+        [TestCase("Time")]
+        [TestCase("Timestamp")]
+        [TestCase("Blob")]
         [TestCase("Point")]
+        [TestCase("Linestring")]
+        [TestCase("Polygon")]
         public void Should_Handle_Types(string type)
         {
             var g = DseGraph.Traversal(Session);
@@ -101,13 +117,9 @@ namespace Dse.Graph.Test.Integration
                 var vertexLabel = $"vertex{type}";
                 var propertyName = $"prop{type}";
                 g.AddV(vertexLabel).Property(propertyName, value).Next();
-                var result = g.V().HasLabel(vertexLabel).Has(propertyName, value).Next();
-//                var parameters = new { vertexLabel = vertexLabel, propertyName = propertyName, val = value };
-//                session.ExecuteGraph(new SimpleGraphStatement("g.addV(label, vertexLabel, propertyName, val)", parameters));
-//
-//                var rs =
-//                    session.ExecuteGraph(
-//                        new SimpleGraphStatement("g.V().hasLabel(vertexLabel).has(propertyName, val).next()", parameters));
+                var result = g.V().HasLabel(vertexLabel).Has(propertyName, value)
+                    .Values<object>(propertyName).Next();
+                Assert.AreEqual(value, result);
             }
         }
     }
