@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dse.Geometry;
 using Dse.Graph.Test.Integration.TestClusterManagement;
+using Gremlin.Net.Process.Traversal;
 using Gremlin.Net.Structure;
 using NUnit.Framework;
 
@@ -71,7 +72,7 @@ namespace Dse.Graph.Test.Integration
         {
             var g = DseGraph.Traversal(Session);
             var vertices = g.V().HasLabel("person").ToList();
-            Assert.Greater(vertices.Count, 0);
+            Assert.GreaterOrEqual(vertices.Count, 4);
             foreach (var vertex in vertices)
             {
                 Assert.AreEqual("person", vertex.Label);
@@ -83,8 +84,11 @@ namespace Dse.Graph.Test.Integration
         {
             var g = DseGraph.Traversal(Session);
             var names = g.V().HasLabel("person").Values<string>("name").ToList();
-            Assert.Greater(names.Count, 0);
+            Assert.GreaterOrEqual(names.Count, 4);
             CollectionAssert.Contains(names, "peter");
+            CollectionAssert.Contains(names, "josh");
+            CollectionAssert.Contains(names, "vadas");
+            CollectionAssert.Contains(names, "marko");
         }
 
         [Test]
@@ -121,6 +125,185 @@ namespace Dse.Graph.Test.Integration
                     .Values<object>(propertyName).Next();
                 Assert.AreEqual(value, result);
             }
+        }
+
+        [Test]
+        public void Should_Use_Vertex_Id_As_Parameter()
+        {
+            var g = DseGraph.Traversal(Session);
+            var vertices = g.V().HasLabel("person").Has("name", "marko").ToList();
+            Assert.AreEqual(1, vertices.Count);
+            var markoVertex = vertices.First();
+            var markoVertexByIdResult = g.V(markoVertex.Id).ToList();
+            Assert.AreEqual(1, markoVertexByIdResult.Count);
+            Assert.AreEqual("person", markoVertexByIdResult.First().Label);
+        }
+
+        [Test]
+        public void Should_Use_Edge_Id_As_Parameter()
+        {
+            var g = DseGraph.Traversal(Session);
+            var edges = g.E().HasLabel("knows").Has("weight", 0.5f).ToList();
+            Assert.AreEqual(1, edges.Count);
+            var knowEdge = edges.First();
+            var knowEdgeByIdResult = g.E(knowEdge.Id).ToList();
+            Assert.AreEqual(1, knowEdgeByIdResult.Count);
+            Assert.AreEqual("knows", knowEdgeByIdResult.First().Label);
+        }
+
+        [Test]
+        public void Should_Be_Able_To_Query_With_Predicate()
+        {
+            var g = DseGraph.Traversal(Session);
+            var edges = g.E().HasLabel("knows").Has("weight", P.Gte(0.5f)).ToList();
+            VerifyEdgeResults(edges, 2, "knows");
+
+            edges = g.E().HasLabel("knows").Has("weight", P.Between(0.4f, 0.6f)).ToList();
+            VerifyEdgeResults(edges, 1, "knows");
+
+            edges = g.E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
+            VerifyEdgeResults(edges, 1, "knows");
+
+            edges = g.E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
+            VerifyEdgeResults(edges, 1, "knows");
+
+            var vertices = g.V().HasLabel("person").Has("name", P.Eq("marko")).ToList();
+            VerifyVertexResults(vertices, 1, "person");
+
+            vertices = g.V().HasLabel("person").Has("name", P.Neq("marko")).ToList();
+            VerifyVertexResults(vertices, 3, "person");
+
+            vertices = g.V().HasLabel("person").Has("name", P.Within("marko", "josh", "john")).ToList();
+            VerifyVertexResults(vertices, 2, "person");
+        }
+
+        private static void VerifyEdgeResults(IList<Gremlin.Net.Structure.Edge> edges, int count, string label)
+        {
+            Assert.AreEqual(count, edges.Count);
+            foreach (var edge in edges)
+            {
+                Assert.AreEqual(label, edge.Label);
+            }
+        }
+
+        private static void VerifyVertexResults(IList<Gremlin.Net.Structure.Vertex> vertices, int count, string label)
+        {
+            Assert.AreEqual(count, vertices.Count);
+            foreach (var vertex in vertices)
+            {
+                Assert.AreEqual(label, vertex.Label);
+            }
+        }
+
+        [Test]
+        public void Should_Retrieve_Path_With_Labels()
+        {
+            var g = DseGraph.Traversal(Session);
+            var result = g.V().HasLabel("person").Has("name", "marko").As("a")
+                .OutE("knows").As("b")
+                .InV().As("c", "d")
+                .OutE("created").As("e", "f", "g")
+                .InV().As("h")
+                .Path().ToList();
+
+            Assert.AreEqual(2, result.Count);
+            foreach (var path in result)
+            {
+                var pathObjs = path.Objects;
+                Assert.AreEqual(5, pathObjs.Count);
+                var marko = (Gremlin.Net.Structure.Vertex)pathObjs[0];
+                var knows = (Gremlin.Net.Structure.Edge)pathObjs[1];
+                var josh = (Gremlin.Net.Structure.Vertex)pathObjs[2];
+                var created = (Gremlin.Net.Structure.Edge)pathObjs[3];
+                var software = (Gremlin.Net.Structure.Vertex)pathObjs[4];
+
+                Assert.AreEqual(marko.Label, "person");
+                Assert.AreEqual(knows.Label, "knows");
+                Assert.AreEqual(josh.Label, "person");
+                Assert.AreEqual(created.Label, "created");
+                Assert.AreEqual(software.Label, "software");
+            }
+        }
+
+        [Test]
+        public void Should_Be_Able_To_Create_And_Drop_Vertex()
+        {
+            const string name = "john snow";
+            var g = DseGraph.Traversal(Session);
+            g.AddV("character").Property("name", name).Property("age", 20).Next();
+            var knowsNothing = g.V().HasLabel("character").Has("name", name).ToList();
+            Assert.AreEqual(1, knowsNothing.Count);
+            g.V().HasLabel("character").Has("name", P.Eq(name)).Drop().ToList();
+            knowsNothing = g.V().HasLabel("character").Has("name", P.Eq(name)).ToList();
+            Assert.AreEqual(0, knowsNothing.Count);
+        }
+
+        [Test]
+        public void Should_Be_Able_To_Create_Vertex_With_Multicardinality_Property()
+        {
+            var g = DseGraph.Traversal(Session);
+            g.AddV("multi_v")
+                .Property("multi_prop", "Hold")
+                .Property("multi_prop", "the")
+                .Property("multi_prop", "door")
+                .Next();
+            StatementIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
+            g.V().HasLabel("multi_v").Drop().Next();
+        }
+
+        [Test]
+        public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
+        {
+            var g = DseGraph.Traversal(Session);
+            g.AddV("meta_v")
+                .Property("meta_prop", "White Walkers", "sub_prop", "Dragonglass", "sub_prop2", "Valyrian steel")
+                .Next();
+            StatementIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
+            g.V().HasLabel("meta_v").Drop().Next();
+        }
+
+        [Test]
+        public void Should_Handle_Result_With_Mixed_Object()
+        {
+            var g = DseGraph.Traversal(Session);
+            var result = g.V().HasLabel("software")
+                .As("a", "b", "c")
+                .Select<object>("a", "b", "c")
+                .By("name")
+                .By("lang")
+                .By(__.In("created").Values<string>("name").Fold<string>()).ToList();
+
+            Assert.AreEqual(2, result.Count);
+            var lop = result.FirstOrDefault(software => software["a"].Equals("lop"));
+            var ripple = result.FirstOrDefault(software => software["a"].Equals("ripple"));
+            Assert.IsNotNull(lop);
+            Assert.IsNotNull(ripple);
+            Assert.AreEqual("java", lop["b"]);
+            Assert.AreEqual("java", ripple["b"]);
+            var lopDevs = (lop["c"] as IEnumerable).Cast<string>();
+            var rippleDevs = (ripple["c"] as IEnumerable).Cast<string>();
+            Assert.AreEqual(3, lopDevs.Count());
+            Assert.AreEqual(1, rippleDevs.Count());
+            Assert.True(lopDevs.Contains("marko"));
+            Assert.True(lopDevs.Contains("josh"));
+            Assert.True(lopDevs.Contains("peter"));
+        }
+
+        [Test]
+        public void Should_Execute_Trasversal_With_Enums()
+        {
+            var g = DseGraph.Traversal(Session);
+            var enums = g.V().HasLabel("person").Has("age").Order().By("age", Order.Decr).ToList();
+            Assert.AreEqual(4, enums.Count);
+        }
+
+        [Test]
+        public void Should_Make_OLAP_Query_Using_Traversal()
+        {
+            var g = DseGraph.Traversal(Session, new GraphOptions().SetSourceAnalytics());
+            var result = g.V().HasLabel("person")
+                .PeerPressure().By("cluster").ToList();
+            Assert.AreEqual(4, result.Count);
         }
     }
 }

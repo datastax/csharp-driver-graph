@@ -20,8 +20,15 @@ namespace Dse.Graph.Test.Integration
             "schema.propertyKey('age').Int().ifNotExists().create();\n" +
             "schema.propertyKey('lang').Text().ifNotExists().create();\n" +
             "schema.propertyKey('weight').Float().ifNotExists().create();\n" +
+            "schema.propertyKey('multi_prop').Text().multiple().ifNotExists().create()\n" +
+            "schema.propertyKey('sub_prop').Text().ifNotExists().create()\n" +
+            "schema.propertyKey('sub_prop2').Text().ifNotExists().create()\n" +
+            "schema.propertyKey('meta_prop').Text().properties('sub_prop', 'sub_prop2').ifNotExists().create()\n" +
+            "schema.vertexLabel('multi_v').properties('multi_prop').ifNotExists().create()\n" +
+            "schema.vertexLabel('meta_v').properties('meta_prop').ifNotExists().create()\n" +
             "schema.vertexLabel('person').properties('name', 'age').ifNotExists().create();\n" +
             "schema.vertexLabel('software').properties('name', 'lang').ifNotExists().create();\n" +
+            "schema.vertexLabel('character').properties('name', 'age').ifNotExists().create()\n" +
             "schema.edgeLabel('created').properties('weight').connection('person', 'software').ifNotExists().create();\n" +
             "schema.edgeLabel('knows').properties('weight').connection('person', 'person').ifNotExists().create();\n";
         
@@ -39,23 +46,22 @@ namespace Dse.Graph.Test.Integration
             "josh.addEdge('created', lop, 'weight', 0.4f);\n" +
             "peter.addEdge('created', lop, 'weight', 0.2f);";
 
-        protected const string MakeStrict = "schema.config().option(\"graph.schema_mode\").set(\"production\");";
-        protected const string AllowScans = "schema.config().option(\"graph.allow_scan\").set(\"true\");";
+        protected const string MakeStrict = "schema.config().option('graph.schema_mode').set('production');";
+        protected const string AllowScans = "schema.config().option('graph.allow_scan').set('true');";
 
         [OneTimeSetUp]
         public void SetupTestSuite()
         {
-            // this method is executed once BEFORE all the fixtures are started
+            //this method is executed once BEFORE all the fixtures are started
             TestClusterManager.CreateNew(1, new TestClusterOptions
             {
-                Workloads = new [] { "graph" }
+                Workloads = new[] { "graph", "spark" }
             });
             using (var cluster = DseCluster.Builder().AddContactPoint(TestClusterManager.InitialContactPoint).Build())
             {
                 var session = cluster.Connect();
                 CreateDefaultGraph(session);
             }
-
         }
 
         private void CreateDefaultGraph(IDseSession session)
