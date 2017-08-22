@@ -3,6 +3,8 @@
 This package builds on the [DataStax Enterprise C# driver][dse-driver], adding functionality for interacting
 with DSE graph features using [Apache TinkerPop][tinkerpop] Gremlin.Net.
 
+This library supports .NET Framework 4.6.1+ and .NET Core 1+.
+
 The package can be used solely with [DataStax Enterprise][dse]. Please consult [the license](#license).
 
 ## Installation
@@ -40,6 +42,8 @@ You can reuse your `GraphTraversalSource` instance across your application.
 ```c#
 IList<Vertex> people = g.V().HasLabel("person").ToList();
 ```
+
+Visit the [Getting Started Guide][getting-started] for more examples.
 
 ## Getting Help
 

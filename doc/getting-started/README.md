@@ -129,7 +129,7 @@ var g = DseGraph.Traversal(session, new GraphOptions().SetName("demo"));
 
 That way all traversals created from the `GraphTraversalSource` instance will be using those options.
 
-[glv]: http://tinkerpop.apache.org/docs/3.2.6-SNAPSHOT/reference/#gremlin-DotNet
+[glv]: http://tinkerpop.apache.org/docs/3.2.6/reference/#gremlin-DotNet
 [gremlin-terminal]: http://tinkerpop.apache.org/docs/current/reference/#terminal-steps
 [dse-driver]: https://github.com/datastax/csharp-dse-driver
 [enum]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/enum
