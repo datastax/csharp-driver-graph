@@ -1,7 +1,7 @@
 # DataStax Enterprise C# Graph Extension
 
 This package builds on the [DataStax Enterprise C# driver][dse-driver], adding functionality for interacting
-with DSE graph features using [Apache TinkerPop][tinkerpop] Gremlin.Net.
+with DSE graph features using [Apache TinkerPop][tinkerpop] [Gremlin.Net][gremlin-dotnet].
 
 This library supports .NET Framework 4.6.1+ and .NET Core 1+.
 
@@ -66,3 +66,4 @@ http://www.datastax.com/terms/datastax-dse-driver-license-terms
 [mailing-list]: https://groups.google.com/a/lists.datastax.com/forum/#!forum/csharp-driver-user
 [slack]: https://academy.datastax.com/slack
 [tinkerpop]: http://tinkerpop.apache.org/
+[gremlin-dotnet]: http://tinkerpop.apache.org/docs/3.2.6/reference/#gremlin-DotNet

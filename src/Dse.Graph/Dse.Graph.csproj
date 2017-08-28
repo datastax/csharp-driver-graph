@@ -1,15 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Description>This package builds on the DataStax Enterprise C# driver, adding functionality for interacting with DSE graph features using Apache TinkerPop Gremlin.Net.</Description>
+    <Copyright>Copyright © 2017 by DataStax</Copyright>
     <TargetFramework>netstandard1.5</TargetFramework>
     <!-- Assembly version should remain constant until the next major -->
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <VersionSuffix>alpha1</VersionSuffix>
+    <VersionSuffix>beta1</VersionSuffix>
     <Authors>DataStax</Authors>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile Condition="'$(Configuration)'=='Release'">true</GenerateDocumentationFile>
-    <Product>DataStax Enterprise C# Driver</Product>
+    <Product>DataStax Enterprise C# Graph Extension</Product>
+    <Title>DataStax Enterprise C# Graph Extension</Title>
     <PackageTags>dse;datastax;driver;client;graph;graphdb;database;nosql;dotnet;netcore;db</PackageTags>
     <PackageLicenseUrl>http://www.datastax.com/terms/datastax-dse-driver-license-terms</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/datastax/csharp-dse-graph</RepositoryUrl>
