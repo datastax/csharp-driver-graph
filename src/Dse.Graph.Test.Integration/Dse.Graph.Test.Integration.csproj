@@ -8,16 +8,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dse" Version="2.0.3" />
+    <PackageReference Include="Gremlin.Net" Version="[3.2.6-rc1,3.3)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="NUnit" Version="3.7.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
     <PackageReference Include="SSH.NET" Version="2016.0.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Gremlin.Net">
-      <HintPath>..\..\..\temp\Gremlin.Net.v3.2.5-preview1\Gremlin.Net.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <Reference Include="Microsoft.CSharp" />
@@ -25,11 +21,6 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Gremlin.Net">
-      <HintPath>..\..\..\temp\Gremlin.Net.v3.2.5-preview1\Gremlin.Net.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
