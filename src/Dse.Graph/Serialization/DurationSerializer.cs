@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
@@ -59,7 +60,7 @@ namespace Dse.Graph.Serialization
             if (remainder > 0L)
             {
                 var seconds = Convert.ToDecimal(remainder) / NanosPerSecond;
-                builder.Append(string.Format("{0:0.#########}", seconds)).Append("S");
+                builder.Append(string.Format(CultureInfo.InvariantCulture, "{0:0.#########}", seconds)).Append("S");
             }
             return builder.ToString();
         }
