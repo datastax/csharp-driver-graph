@@ -271,7 +271,7 @@ namespace Dse.Graph.Test.Integration
                 .Select<object>("a", "b", "c")
                 .By("name")
                 .By("lang")
-                .By(__.In("created").Values<string>("name").Fold<string>()).ToList();
+                .By(__.In("created").Values<string>("name").Fold()).ToList();
 
             Assert.AreEqual(2, result.Count);
             var lop = result.FirstOrDefault(software => software["a"].Equals("lop"));
