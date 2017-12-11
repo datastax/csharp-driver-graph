@@ -30,17 +30,18 @@ namespace Dse.Graph
             new TypeSerializer<Polygon>("dse", "Polygon", Polygon.Parse),
             new ByteArraySerializer(),
             new DateTimeOffsetSerializer("g", "Timestamp"),
-            new DateTimeOffsetSerializer("gx", "Instant")
+            new DateTimeOffsetSerializer("gx", "Instant"),
+            new GraphNodeSerializer()
         };
-        
-        private static readonly GraphSONReader Reader = new GraphSONReader(
-            CustomSerializers.ToDictionary(s => s.FullTypeName, s => (IGraphSONDeserializer)s));
+
+        private static readonly GraphSONReader Reader = new GraphSONReader(CustomSerializers
+            .Where(s => s.FullTypeName != null).ToDictionary(s => s.FullTypeName, s => (IGraphSONDeserializer) s));
 
         internal static readonly GraphSONWriter Writer = new GraphSONWriter(
             CustomSerializers.GroupBy(s => s.Type).Select(g => g.First())
                              .ToDictionary(s => s.Type, s => (IGraphSONSerializer) s));
         
-        internal const string GraphLanguage = "bytecode-json";
+        private const string GraphLanguage = "bytecode-json";
         
         private readonly GraphOptions _graphOptions;
         private readonly IDseSession _session;
