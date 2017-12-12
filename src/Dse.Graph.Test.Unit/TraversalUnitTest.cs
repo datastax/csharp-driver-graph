@@ -5,6 +5,7 @@
 //  http://www.datastax.com/terms/datastax-dse-driver-license-terms
 //
 
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Moq;
 
@@ -50,6 +51,34 @@ namespace Dse.Graph.Test.Unit
             });
         }
 
+        [Test]
+        public void Extension_Method_Should_Build_Traversal_And_Execute()
+        {
+            WithMock((IDseSession session, ref IGraphStatement statement) =>
+            {
+                var g = DseGraph.Traversal(session);
+                session.ExecuteGraph(g.V());
+                Assert.NotNull(statement);
+                Assert.IsInstanceOf<SimpleGraphStatement>(statement);
+                var s = (SimpleGraphStatement) statement;
+                StringAssert.Contains("g:Bytecode", s.Query);
+            });
+        }
+
+        [Test]
+        public void Extension_Async_Method_Should_Build_Traversal_And_Execute()
+        {
+            WithMock((IDseSession session, ref IGraphStatement statement) =>
+            {
+                var g = DseGraph.Traversal(session);
+                session.ExecuteGraphAsync(g.V());
+                Assert.NotNull(statement);
+                Assert.IsInstanceOf<SimpleGraphStatement>(statement);
+                var s = (SimpleGraphStatement) statement;
+                StringAssert.Contains("g:Bytecode", s.Query);
+            });
+        }
+
         private static void WithMock(WithMockDelegate handler)
         {
             IGraphStatement statement = null;
@@ -59,10 +88,14 @@ namespace Dse.Graph.Test.Unit
                 .Callback<IGraphStatement>(stmt =>
                 {
                     statement = stmt;
-                })
-                .Verifiable();
+                });
+            sessionMock.Setup(s => s.ExecuteGraph(It.IsAny<IGraphStatement>()))
+                .Returns(new GraphResultSet(new RowSet()))
+                .Callback<IGraphStatement>(stmt =>
+                {
+                    statement = stmt;
+                });
             handler(sessionMock.Object, ref statement);
-            sessionMock.Verify();
         }
     }
 }

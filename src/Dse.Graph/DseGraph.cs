@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using Gremlin.Net.Process.Traversal;
 
 namespace Dse.Graph
@@ -55,6 +56,27 @@ namespace Dse.Graph
             }
             var query = DseRemoteConnection.Writer.WriteObject(traversal.Bytecode);
             return DseRemoteConnection.CreateStatement(query, null);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="IGraphStatement"/> from the given traversal and executes it using the provided session.
+        /// </summary>
+        /// <param name="session">The session instance used to execute the statement.</param>
+        /// <param name="traversal">The traversal to create the statement to execute.</param>
+        public static GraphResultSet ExecuteGraph(this IDseSession session, ITraversal traversal)
+        {
+            return session.ExecuteGraph(StatementFromTraversal(traversal));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="IGraphStatement"/> from the given traversal and asynchronously executes it using the
+        /// provided session.
+        /// </summary>
+        /// <param name="session">The session instance used to execute the statement.</param>
+        /// <param name="traversal">The traversal to create the statement to execute.</param>
+        public static Task<GraphResultSet> ExecuteGraphAsync(this IDseSession session, ITraversal traversal)
+        {
+            return session.ExecuteGraphAsync(StatementFromTraversal(traversal));
         }
     }
 }
