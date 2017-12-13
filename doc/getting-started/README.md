@@ -49,14 +49,19 @@ var statement = DseGraph.StatementFromTraversal(g.V().HasLabel("person"));
 GraphResultSet result = session.ExecuteGraph(statement);
 ```
 
-`GraphResultSet` is an `IEnumerable<GraphNode>` implementation. `GraphNode` instances can be implitly casted to
-`Vertex`, `Edge` and `Path`. Additionally you can use the method `To<T>()` to convert to the supported types.
+You can benefit from the extension method on the `Dse.Graph` namespace to call `ExecuteGraph()` using the traversal,
+without the need to manually convert it:
 
 ```c#
-// The field person is an instance of Dse.Graph.Vertex
-foreach (Vertex person in result)
+GraphResultSet result = session.ExecuteGraph(g.V().HasLabel("person"));
+```
+
+`GraphResultSet` is an `IEnumerable<IGraphNode>` implementation. `IGraphNode` represents a response item returned by the server. Each item can be converted to the expected type, for example: `node.To<IVertex>()`. You can also apply a conversion to the expected type to all the sequence by using `GraphResultSet.To<T>()` method:
+
+```c#
+foreach (IVertex vertex in result.To<IVertex>())
 {
-    Console.WriteLine(person.Label);
+    Console.WriteLine(vertex.Label);
 }
 ```
 
@@ -91,7 +96,7 @@ using static Gremlin.Net.Process.Traversal.P;
 Then it is possible to represent the above traversal as below.
 
 ```c#
-// Out is declared in the __ class
+// Gt is declared in the P class
 g.V().HasLabel("person").Has("age", Gt(36))
 ```
 
@@ -104,7 +109,7 @@ using static Gremlin.Net.Process.Traversal.__;
 
 ```c#
 // Out is declared in the __ class
-g.V().Repeat(Out()).Times(2).Values("name").Fold()
+g.V().Repeat(Out()).Times(2).Values<string>("name").Fold()
 ```
 
 ## Execution options
@@ -129,7 +134,7 @@ var g = DseGraph.Traversal(session, new GraphOptions().SetName("demo"));
 
 That way all traversals created from the `GraphTraversalSource` instance will be using those options.
 
-[glv]: http://tinkerpop.apache.org/docs/3.2.6/reference/#gremlin-DotNet
+[glv]: http://tinkerpop.apache.org/docs/3.2.7-SNAPSHOT/reference/#gremlin-DotNet
 [gremlin-terminal]: http://tinkerpop.apache.org/docs/current/reference/#terminal-steps
 [dse-driver]: https://github.com/datastax/csharp-dse-driver
 [enum]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/enum
