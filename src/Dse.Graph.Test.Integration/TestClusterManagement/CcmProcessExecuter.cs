@@ -8,6 +8,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using NUnit.Framework;
 
 namespace Dse.Graph.Test.Integration.TestClusterManagement
 {
@@ -17,6 +18,7 @@ namespace Dse.Graph.Test.Integration.TestClusterManagement
         {
             var executable = GetExecutable(ref args);
             Trace.TraceInformation(executable + " " + args);
+            TestContext.Progress.WriteLine(executable + " " + args);
             var output = ExecuteProcess(executable, args, timeout);
             if (throwOnProcessError)
             {
@@ -97,6 +99,7 @@ namespace Dse.Graph.Test.Integration.TestClusterManagement
                     catch (Exception exception)
                     {
                         Trace.TraceInformation("Process start failure: " + exception.Message);
+                        TestContext.Progress.WriteLine("Process start failure: " + exception.Message);
                     }
 
                     process.BeginOutputReadLine();

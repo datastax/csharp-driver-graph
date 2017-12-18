@@ -5,6 +5,7 @@
 //  http://www.datastax.com/terms/datastax-dse-driver-license-terms
 //
 
+using System;
 using System.Diagnostics;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -43,6 +44,7 @@ namespace Dse.Graph.Test.Integration.TestClusterManagement
                 var pauth = new PasswordAuthenticationMethod(_user, _password);
 
                 var connectionInfo = new ConnectionInfo(_ip, _port, _user, kauth, pauth);
+                connectionInfo.Timeout = TimeSpan.FromMinutes(5);
 
                 kauth.AuthenticationPrompt += delegate(object sender, AuthenticationPromptEventArgs e)
                 {

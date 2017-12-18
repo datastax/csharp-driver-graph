@@ -51,12 +51,19 @@ namespace Dse.Graph.Test.Integration
                         typeDef = $"{type}().withGeoBounds()";
                         break;
                 }
+                else
+                {
+                    if (type == "Date" || type == "Time")
+                    {
+                        continue;
+                    }
+                }
                 
                 var schemaQuery = $"schema.propertyKey(propertyName).{typeDef}.ifNotExists().create();\n" +
                                   "schema.vertexLabel(vertexLabel).properties(propertyName).ifNotExists().create();";
                 var statement = new SimpleGraphStatement(schemaQuery,
                     new {vertexLabel = $"vertex{type}", propertyName = $"prop{type}"});
-                Session.ExecuteGraph(statement);
+                Session.ExecuteGraph(statement.SetGraphLanguage("gremlin-groovy"));
             }
         }
         
@@ -106,8 +113,6 @@ namespace Dse.Graph.Test.Integration
 
         [TestCase("Float")]
         [TestCase("Duration")]
-        [TestCase("Date")]
-        [TestCase("Time")]
         [TestCase("Timestamp")]
         [TestCase("Blob")]
         [TestCase("Point")]
@@ -125,6 +130,13 @@ namespace Dse.Graph.Test.Integration
                     .Values<object>(propertyName).Next();
                 Assert.AreEqual(value, result);
             }
+        }
+
+        [TestCase("Date")]
+        [TestCase("Time"), TestDseVersion(5, 1)]
+        public void Should_Handle_Date_Time_Types(string type)
+        {
+            Should_Handle_Types(type);
         }
 
         [Test]
@@ -304,6 +316,13 @@ namespace Dse.Graph.Test.Integration
             var result = g.V().HasLabel("person")
                 .PeerPressure().By("cluster").ToList();
             Assert.AreEqual(4, result.Count);
+        }
+
+        [Test]
+        public void Should_Override_Cluster_Options()
+        {
+            var g = DseGraph.Traversal(Session, new GraphOptions().SetName("non_existing_graph"));
+            Assert.Throws<InvalidQueryException>(() => g.V().HasLabel("person").ToList());
         }
     }
 }

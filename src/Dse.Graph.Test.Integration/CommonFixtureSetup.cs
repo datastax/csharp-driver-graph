@@ -53,15 +53,19 @@ namespace Dse.Graph.Test.Integration
         public void SetupTestSuite()
         {
             //this method is executed once BEFORE all the fixtures are started
+            TestContext.Progress.WriteLine("Will start dse cluster");
             TestClusterManager.CreateNew(1, new TestClusterOptions
             {
                 Workloads = new[] { "graph", "spark" }
             });
+            TestContext.Progress.WriteLine("DSE started");
             using (var cluster = DseCluster.Builder().AddContactPoint(TestClusterManager.InitialContactPoint).Build())
             {
                 var session = cluster.Connect();
                 CreateDefaultGraph(session);
             }
+
+            TestContext.Progress.WriteLine("Graph created");
         }
 
         private void CreateDefaultGraph(IDseSession session)

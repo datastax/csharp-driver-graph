@@ -1,0 +1,40 @@
+os:
+  - ubuntu/trusty64
+cassandra:
+  - dse-5.0
+  - dse-5.1
+build:
+  - script: |
+      # Set the Java paths (for CCM)
+      export JAVA_HOME=$CCM_JAVA_HOME
+      export PATH=$JAVA_HOME/bin:$PATH
+      export CCM_PATH=$HOME/ccm
+      export DSE_INITIAL_IPPREFIX="127.0.0."
+      export DSE_BRANCH=$CCM_BRANCH
+      export DSE_VERSION=$CCM_VERSION
+      export DSE_IN_REMOTE_SERVER="false"
+      echo $DSE_VERSION
+      echo $DSE_BRANCH
+      echo $DSE_PATH
+      echo $DSE_INITIAL_IPPREFIX
+
+      echo "==========copying ssl files to $HOME/ssl=========="
+      cp -r /home/jenkins/ccm/ssl $HOME/ssl
+ 
+      # Install the required packages
+      echo "==========Install the required packages=========="
+      dotnet restore src
+
+      # Run the tests
+      echo "==========RUNNING FULL SUITE OF TESTS=========="
+      echo "==========RUNNING SUITE OF UNIT TESTS=========="
+      dotnet test src/Dse.Graph.Test.Unit/Dse.Graph.Test.Unit.csproj -f netcoreapp1.1  -c Release --logger "trx;LogFileName=../../../TestResultUnit.trx"
+      echo "==========Transforming unit test result trx file to junit=========="
+      saxon-xslt -o TestResultUnit.xml TestResultUnit.trx tools/trx-to-junit.xslt
+      echo "==========RUNNING SUITE OF INTEGRATION TESTS=========="
+      dotnet test src/Dse.Graph.Test.Integration/Dse.Graph.Test.Integration.csproj -f netcoreapp1.1  -c Release --logger "trx;LogFileName=../../../TestResultIntegration.trx"
+      echo "==========Transforming integration test result trx file to junit=========="
+      saxon-xslt -o TestResultIntegration.xml TestResultIntegration.trx tools/trx-to-junit.xslt
+  - xunit:
+    - "TestResult*.xml"
+
