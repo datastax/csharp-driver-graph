@@ -21,13 +21,30 @@ namespace Dse.Graph.Test.Integration
             var g = DseGraph.Traversal(Session);
             var statement = DseGraph.StatementFromTraversal(g.V().HasLabel("person").Has("name", P.Eq("marko")));
             var rs = await Session.ExecuteGraphAsync(statement);
+            var rsSync = Session.ExecuteGraph(statement);
             // The result should be DSE driver vertices
-            var v = rs.First().ToVertex();
-            Assert.AreEqual("person", v.Label);
-            Assert.AreEqual("marko", v.Properties["name"].ToArray()[0].Get<string>("value"));
-            Assert.AreEqual(29, v.Properties["age"].ToArray()[0].Get<int>("value"));
+            VerifyGraphResultSet(rs);
+            VerifyGraphResultSet(rsSync);
         }
 
+        [Test]
+        public async Task Should_Execute_A_Traversal()
+        {
+            var g = DseGraph.Traversal(Session);
+            var rs = await Session.ExecuteGraphAsync(g.V().HasLabel("person").Has("name", P.Eq("marko")));
+            var rsSync = Session.ExecuteGraph(g.V().HasLabel("person").Has("name", P.Eq("marko")));
+            // The result should be DSE driver vertices
+            VerifyGraphResultSet(rs);
+            VerifyGraphResultSet(rsSync);
+        }
+
+        private static void VerifyGraphResultSet(GraphResultSet rs)
+        {
+            var v = rs.First().ToVertex();
+            Assert.AreEqual("person", v.Label);
+            Assert.AreEqual("marko", v.GetProperty("name").Value.ToString());
+            Assert.AreEqual(29, v.GetProperty("age").Value.ToInt32());
+        }
 
         [Test]
         public void Should_Use_Vertex_Id_As_Parameter()
