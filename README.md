@@ -66,4 +66,4 @@ http://www.datastax.com/terms/datastax-dse-driver-license-terms
 [mailing-list]: https://groups.google.com/a/lists.datastax.com/forum/#!forum/csharp-driver-user
 [slack]: https://academy.datastax.com/slack
 [tinkerpop]: http://tinkerpop.apache.org/
-[gremlin-dotnet]: http://tinkerpop.apache.org/docs/3.2.6/reference/#gremlin-DotNet
+[gremlin-dotnet]: http://tinkerpop.apache.org/docs/3.2.7/reference/#gremlin-DotNet
