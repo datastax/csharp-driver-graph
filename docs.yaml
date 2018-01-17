@@ -7,8 +7,6 @@ sections:
     type:     markdown
     files:    'doc/getting-started/**/*.md'
 links:
-  - title: Code
-    href:  https://github.com/datastax/csharp-dse-graph/
   - title: Issues
     href:  https://datastax-oss.atlassian.net/projects/CSHARP/issues
   - title: Mailing List

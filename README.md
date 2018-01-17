@@ -52,12 +52,12 @@ Additionally, you can use the `#datastax-drivers` channel in the [DataStax Acade
 
 ## License
 
-Copyright 2017 DataStax
+Copyright 2017-2018 DataStax
 
 http://www.datastax.com/terms/datastax-dse-driver-license-terms
 
 [dse]: http://www.datastax.com/products/datastax-enterprise
-[dse-driver]: https://github.com/datastax/csharp-dse-driver
+[dse-driver]: http://docs.datastax.com/en/developer/csharp-driver-dse/latest/
 [nuget]: https://www.nuget.org/packages/Dse.Graph
 [doc-index]: http://docs.datastax.com/en/developer/csharp-dse-graph/latest/
 [doc-api]: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.0/
