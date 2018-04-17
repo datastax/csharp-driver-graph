@@ -17,6 +17,9 @@ links:
     href:  https://www.nuget.org/packages/Dse.Graph
 api_docs:
   1.0: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.0/
+  1.1: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.0/
 versions:
-  - name: '1.0'
+  - name: '1.1'
     ref: 'master'
+  - name: '1.0'
+    ref: '1.0'

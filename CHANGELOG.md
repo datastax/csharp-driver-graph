@@ -1,5 +1,13 @@
 # ChangeLog - DataStax Enterprise C# Graph Extension
 
+## 1.1.0
+
+2018-04-17
+
+### Features
+
+- Update Gremlin.NET dependency to 3.2.8
+
 ## 1.0.0
 
 2017-12-21
