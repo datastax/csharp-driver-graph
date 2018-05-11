@@ -3,6 +3,7 @@ os:
 cassandra:
   - dse-5.0
   - dse-5.1
+  - dse-6.0
 build:
   - script: |
       # Set the Java paths (for CCM)
@@ -37,4 +38,3 @@ build:
       saxon-xslt -o TestResultIntegration.xml TestResultIntegration.trx tools/trx-to-junit.xslt
   - xunit:
     - "TestResult*.xml"
-
