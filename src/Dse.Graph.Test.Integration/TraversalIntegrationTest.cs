@@ -322,7 +322,11 @@ namespace Dse.Graph.Test.Integration
         public void Should_Override_Cluster_Options()
         {
             var g = DseGraph.Traversal(Session, new GraphOptions().SetName("non_existing_graph"));
-            Assert.Throws<InvalidQueryException>(() => g.V().HasLabel("person").ToList());
+            // Its supposed to be InvalidQueryException but DSE 6.0 introduced a bug: DSP-15783
+            if (TestClusterManager.DseVersion < new Version(6, 0))
+            {
+                Assert.Throws<InvalidQueryException>(() => g.V().HasLabel("person").ToList());
+            }
         }
     }
 }
