@@ -6,6 +6,10 @@ sections:
     prefix:   /getting-started
     type:     markdown
     files:    'doc/getting-started/**/*.md'
+  - title:    Changelog
+    prefix:   /changelog
+    type:     markdown
+    files:    'doc/changelog/**/*.md'
 links:
   - title: Issues
     href:  https://datastax-oss.atlassian.net/projects/CSHARP/issues

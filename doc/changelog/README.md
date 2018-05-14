@@ -1,4 +1,4 @@
-# ChangeLog - DataStax Enterprise C# Graph Extension
+# Changelog
 
 ## 1.1.0
 
