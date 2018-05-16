@@ -60,10 +60,10 @@ http://www.datastax.com/terms/datastax-dse-driver-license-terms
 [dse-driver]: http://docs.datastax.com/en/developer/csharp-driver-dse/latest/
 [nuget]: https://www.nuget.org/packages/Dse.Graph
 [doc-index]: http://docs.datastax.com/en/developer/csharp-dse-graph/latest/
-[doc-api]: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.0/
+[doc-api]: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.2/
 [getting-started]: http://docs.datastax.com/en/developer/csharp-dse-graph/latest/getting-started/
 [jira]: https://datastax-oss.atlassian.net/projects/CSHARP/issues
 [mailing-list]: https://groups.google.com/a/lists.datastax.com/forum/#!forum/csharp-driver-user
 [slack]: https://academy.datastax.com/slack
 [tinkerpop]: http://tinkerpop.apache.org/
-[gremlin-dotnet]: http://tinkerpop.apache.org/docs/3.2.7/reference/#gremlin-DotNet
+[gremlin-dotnet]: http://tinkerpop.apache.org/docs/3.2.9/reference/#gremlin-DotNet
