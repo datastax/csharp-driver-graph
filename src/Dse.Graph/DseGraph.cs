@@ -28,7 +28,7 @@ namespace Dse.Graph
         /// the ones defined when building the <see cref="IDseCluster"/> instance for <c>GraphTraversal</c>
         /// execution methods like <c>ToList()</c>.
         /// <para>
-        /// These options won't have any effect when using the method <see cref="StatementFromTraversal(ITraversal)"/>. 
+        /// These options won't have any effect when using the method <see cref="StatementFromTraversal(ITraversal)"/>.
         /// </para>
         /// </param>
         public static GraphTraversalSource Traversal(IDseSession session, GraphOptions graphOptions = null)
@@ -77,6 +77,44 @@ namespace Dse.Graph
         public static Task<GraphResultSet> ExecuteGraphAsync(this IDseSession session, ITraversal traversal)
         {
             return session.ExecuteGraphAsync(StatementFromTraversal(traversal));
+        }
+
+        /// <summary>
+        /// Create a <see cref="ITraversalBatch"/> instance to perform batch mutations in DSE Graph.
+        /// <para>
+        /// Mutations made to the DSE Graph may all or none succeed. In case of an issue during one of the mutations,
+        /// the execution of the batch will fail and none of the mutations will have been applied.
+        /// </para>
+        /// <para>
+        /// A <see cref="ITraversalBatch"/> can be directly executed via
+        /// <see cref="ExecuteGraph(IDseSession, ITraversalBatch)"/> extension method.
+        /// </para>
+        /// </summary>
+        public static ITraversalBatch Batch(GraphOptions options = null)
+        {
+            return new TraversalBatch(options);
+        }
+
+        /// <summary>
+        /// Asynchronously executes a batch of traversals.
+        /// </summary>
+        /// <param name="session">The session to extend.</param>
+        /// <param name="batch">The batch of traversals to execute.</param>
+        /// <seealso cref="Batch"/>
+        public static Task<GraphResultSet> ExecuteGraphAsync(this IDseSession session, ITraversalBatch batch)
+        {
+            return session.ExecuteGraphAsync(batch.ToGraphStatement());
+        }
+
+        /// <summary>
+        /// Executes a batch of traversals.
+        /// </summary>
+        /// <param name="session">The session to extend.</param>
+        /// <param name="batch">The batch of traversals to execute.</param>
+        /// <seealso cref="Batch"/>
+        public static GraphResultSet ExecuteGraph(this IDseSession session, ITraversalBatch batch)
+        {
+            return session.ExecuteGraph(batch.ToGraphStatement());
         }
     }
 }

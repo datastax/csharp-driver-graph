@@ -17,6 +17,7 @@ namespace Dse.Graph.Test.Integration
 
         protected const string ClassicSchemaGremlinQuery =
             "schema.propertyKey('name').Text().ifNotExists().create();\n" +
+            "schema.propertyKey('tag').Text().ifNotExists().create();\n" +
             "schema.propertyKey('age').Int().ifNotExists().create();\n" +
             "schema.propertyKey('lang').Text().ifNotExists().create();\n" +
             "schema.propertyKey('weight').Float().ifNotExists().create();\n" +
@@ -28,9 +29,10 @@ namespace Dse.Graph.Test.Integration
             "schema.vertexLabel('meta_v').properties('meta_prop').ifNotExists().create()\n" +
             "schema.vertexLabel('person').properties('name', 'age').ifNotExists().create();\n" +
             "schema.vertexLabel('software').properties('name', 'lang').ifNotExists().create();\n" +
-            "schema.vertexLabel('character').properties('name', 'age').ifNotExists().create()\n" +
+            "schema.vertexLabel('character').properties('name', 'age', 'tag').ifNotExists().create()\n" +
             "schema.edgeLabel('created').properties('weight').connection('person', 'software').ifNotExists().create();\n" +
-            "schema.edgeLabel('knows').properties('weight').connection('person', 'person').ifNotExists().create();\n";
+            "schema.edgeLabel('knows').properties('weight').connection('person', 'person').ifNotExists().create();\n" +
+            "schema.edgeLabel('knows').properties('weight').connection('character', 'character').ifNotExists().create();\n";
         
         protected const string ClassicLoadGremlinQuery =
             "Vertex marko = graph.addVertex(label, 'person', 'name', 'marko', 'age', 29);\n" +

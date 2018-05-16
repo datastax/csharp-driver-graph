@@ -5,7 +5,7 @@
 //  http://www.datastax.com/terms/datastax-dse-driver-license-terms
 //
 
-using System.Threading.Tasks;
+using System;
 using NUnit.Framework;
 using Moq;
 
@@ -15,7 +15,7 @@ namespace Dse.Graph.Test.Unit
     public class TraversalUnitTest
     {
         private delegate void WithMockDelegate(IDseSession session, ref IGraphStatement statement);
-        
+
         [Test]
         public void Should_Set_The_Graph_Language()
         {
@@ -24,7 +24,7 @@ namespace Dse.Graph.Test.Unit
                 var g = DseGraph.Traversal(session);
                 g.V().ToList();
                 Assert.NotNull(statement);
-                Assert.AreEqual("bytecode-json", statement.GraphLanguage); 
+                Assert.AreEqual("bytecode-json", statement.GraphLanguage);
             });
         }
 
@@ -43,11 +43,7 @@ namespace Dse.Graph.Test.Unit
                 g.V().ToList();
                 Assert.NotNull(statement);
                 Assert.AreEqual("bytecode-json", statement.GraphLanguage);
-                Assert.AreEqual(options.Name, statement.GraphName);
-                Assert.AreEqual(options.Source, statement.GraphSource);
-                Assert.AreEqual(options.ReadTimeoutMillis, statement.ReadTimeoutMillis);
-                Assert.AreEqual(options.ReadConsistencyLevel, statement.GraphReadConsistencyLevel);
-                Assert.AreEqual(options.WriteConsistencyLevel, statement.GraphWriteConsistencyLevel);
+                CompareGraphOptionsOnStatement(options, statement);
             });
         }
 
@@ -77,6 +73,51 @@ namespace Dse.Graph.Test.Unit
                 var s = (SimpleGraphStatement) statement;
                 StringAssert.Contains("g:Bytecode", s.Query);
             });
+        }
+
+        [Test]
+        public void TraversalBatch_Should_Use_GraphOptions()
+        {
+            WithMock((IDseSession session, ref IGraphStatement statement) =>
+            {
+                var g = DseGraph.Traversal(session);
+                var options = new GraphOptions().SetName("name1")
+                    .SetReadConsistencyLevel(ConsistencyLevel.LocalQuorum)
+                    .SetWriteConsistencyLevel(ConsistencyLevel.Quorum)
+                    .SetReadTimeoutMillis(123499);
+                var batch = DseGraph.Batch(options);
+                batch
+                    .Add(g.AddV("person").Property("name", "Matias").Property("age", 12))
+                    .Add(g.AddV("person").Property("name", "Olivia").Property("age", 8));
+                session.ExecuteGraph(batch);
+                Assert.NotNull(statement);
+                Assert.IsInstanceOf<SimpleGraphStatement>(statement);
+                var query = ((SimpleGraphStatement) statement).Query;
+                Assert.AreEqual("bytecode-json", statement.GraphLanguage);
+                CompareGraphOptionsOnStatement(options, statement);
+                StringAssert.Contains(
+                    "{\"@type\":\"g:Bytecode\",\"@value\":{\"step\":[[\"addV\",\"person\"],[\"property\",\"name\",\"Matias\"],[\"property\",\"age\",{\"@type\":\"g:Int32\",\"@value\":12}]]}}",
+                    query);
+                StringAssert.Contains(
+                    "{\"@type\":\"g:Bytecode\",\"@value\":{\"step\":[[\"addV\",\"person\"],[\"property\",\"name\",\"Olivia\"],[\"property\",\"age\",{\"@type\":\"g:Int32\",\"@value\":8}]]}}",
+                    query);
+            });
+        }
+
+        [Test]
+        public void TraversalBatch_Should_Throw_When_No_Traversal_Was_Provided()
+        {
+            var batch = DseGraph.Batch();
+            Assert.Throws<InvalidOperationException>(() => batch.ToGraphStatement());
+        }
+
+        private static void CompareGraphOptionsOnStatement(GraphOptions options, IGraphStatement statement)
+        {
+            Assert.AreEqual(options.Name, statement.GraphName);
+            Assert.AreEqual(options.Source, statement.GraphSource);
+            Assert.AreEqual(options.ReadTimeoutMillis, statement.ReadTimeoutMillis);
+            Assert.AreEqual(options.ReadConsistencyLevel, statement.GraphReadConsistencyLevel);
+            Assert.AreEqual(options.WriteConsistencyLevel, statement.GraphWriteConsistencyLevel);
         }
 
         private static void WithMock(WithMockDelegate handler)
