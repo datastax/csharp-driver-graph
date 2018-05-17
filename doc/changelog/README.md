@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+
+2018-05-17
+
+### Features
+
+- [CSHARP-684] - Graph batch mutations in Fluent API
+- [CSHARP-686] - Bump Gremlin.NET Dependency to 3.2.9
+
 ## 1.1.0
 
 2018-04-17
