@@ -1,6 +1,7 @@
 title: DataStax Enterprise C# Driver Extensions for DSE Graph
 summary: DataStax Enterprise C# Driver Extensions for DSE Graph
 theme:    datastax
+swiftype_drivers: csharpdrivers
 sections:
   - title:    Getting started
     prefix:   /getting-started
