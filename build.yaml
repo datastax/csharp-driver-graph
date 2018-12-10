@@ -1,5 +1,5 @@
 os:
-  - ubuntu/trusty64
+  - ubuntu/bionic64/csharp-driver
 cassandra:
   - dse-5.0
   - dse-5.1
@@ -21,7 +21,15 @@ build:
 
       echo "==========copying ssl files to $HOME/ssl=========="
       cp -r /home/jenkins/ccm/ssl $HOME/ssl
- 
+
+      # Download and uncompress saxon
+      mkdir saxon
+      curl -L -o saxon/SaxonHE9-8-0-12J.zip https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.8/SaxonHE9-8-0-12J.zip
+      unzip saxon/SaxonHE9-8-0-12J.zip -d saxon
+
+      export DOTNET_CLI_TELEMETRY_OUTPUT=1
+      dotnet --version
+
       # Install the required packages
       echo "==========Install the required packages=========="
       dotnet restore src
@@ -29,12 +37,12 @@ build:
       # Run the tests
       echo "==========RUNNING FULL SUITE OF TESTS=========="
       echo "==========RUNNING SUITE OF UNIT TESTS=========="
-      dotnet test src/Dse.Graph.Test.Unit/Dse.Graph.Test.Unit.csproj -f netcoreapp1.1  -c Release --logger "trx;LogFileName=../../../TestResultUnit.trx"
+      dotnet test src/Dse.Graph.Test.Unit/Dse.Graph.Test.Unit.csproj -f netcoreapp2.0  -c Release --logger "trx;LogFileName=../../../TestResultUnit.trx"
       echo "==========Transforming unit test result trx file to junit=========="
-      saxon-xslt -o TestResultUnit.xml TestResultUnit.trx tools/trx-to-junit.xslt
+      java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit.trx tools/trx-to-junit.xslt
       echo "==========RUNNING SUITE OF INTEGRATION TESTS=========="
-      dotnet test src/Dse.Graph.Test.Integration/Dse.Graph.Test.Integration.csproj -f netcoreapp1.1  -c Release --logger "trx;LogFileName=../../../TestResultIntegration.trx"
+      dotnet test src/Dse.Graph.Test.Integration/Dse.Graph.Test.Integration.csproj -f netcoreapp2.0  -c Release --logger "trx;LogFileName=../../../TestResultIntegration.trx"
       echo "==========Transforming integration test result trx file to junit=========="
-      saxon-xslt -o TestResultIntegration.xml TestResultIntegration.trx tools/trx-to-junit.xslt
+      java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration.trx tools/trx-to-junit.xslt
   - xunit:
     - "TestResult*.xml"
