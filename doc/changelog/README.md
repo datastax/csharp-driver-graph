@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0
+
+2020-01-15
+
+### Features
+
+*   [[CSHARP-791](https://datastax-oss.atlassian.net/browse/CSHARP-791)] - Unified Driver
+
 ## 1.2.0
 
 2018-05-17
