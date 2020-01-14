@@ -1,28 +1,28 @@
 # Getting started
 
-The `Dse.Graph` package leverages the features of [Gremlin.Net language variant][glv] and the high-level client driver
-features of the [DataStax Enterprise C# Driver][dse-driver].
+The `CassandraCSharpDriver.Graph` package leverages the features of [Gremlin.Net language variant][glv] and the high-level client driver
+features of the [DataStax C# Driver for Apache Cassandra][driver].
 
 ```c#
-using Dse;
-using Dse.Graph;
+using Cassandra;
+using Cassandra.DataStax.Graph;
 using Gremlin.Net;
 ```
 
-To start building traversals, you will need a `IDseSession` instance that represents a pool of connections to your
+To start building traversals, you will need a `ISession` instance that represents a pool of connections to your
 DSE cluster.
  
 ```c#
-IDseCluster cluster = DseCluster.Builder()
+ICluster cluster = Cluster.Builder()
                                 .AddContactPoint("127.0.0.1")
                                 .Build();
-IDseSession session = cluster.Connect();
+ISession session = cluster.Connect();
 ```
 
-`IDseSession` instances of the [DSE driver][dse-driver] are designed to be long-lived and you should normally
+`ISession` instances of the [DataStax C# Driver for Apache Cassandra][driver] are designed to be long-lived and you should normally
 reuse it during your application lifetime.
 
-You can use your `IDseSession` instances to obtain `GraphTraversalSource` instances.
+You can use your `ISession` instances to obtain `GraphTraversalSource` instances.
 
 ```c#
 GraphTraversalSource g = DseGraph.Traversal(session);
@@ -38,18 +38,17 @@ var traversal = g.V().HasLabel("person");
 
 ### Explicit execution
 
-Traversals can be executed like regular `GraphStatement` instaces using `IDseSession.ExecuteGraph()` and
-`IDseSession.ExecuteGraphAsync()` methods.
+Traversals can be executed like regular `GraphStatement` instaces using `ISession.ExecuteGraph()` and
+`ISession.ExecuteGraphAsync()` methods.
 
-The returned types from this execution would be the ones from the DataStax Enterprise C# Driver, in the `Dse.Graph`
-namespace.
+The returned types from this execution would be the ones from the DataStax C# Driver for Apache Cassandra, in the `Cassandra.DataStax.Graph` namespace.
 
 ```c#
 var statement = DseGraph.StatementFromTraversal(g.V().HasLabel("person"));
 GraphResultSet result = session.ExecuteGraph(statement);
 ```
 
-You can benefit from the extension method on the `Dse.Graph` namespace to call `ExecuteGraph()` using the traversal,
+You can benefit from the extension method on the `Cassandra.DataStax.Graph` namespace to call `ExecuteGraph()` using the traversal,
 without the need to manually convert it:
 
 ```c#
@@ -114,11 +113,11 @@ g.V().Repeat(Out()).Times(2).Values<string>("name").Fold()
 
 ## Execution options
 
-[As explained in the C# DSE driver docs][graph-options], the graph options can be defined when initializing the
+[As explained in the C# driver docs][graph-options], the graph options can be defined when initializing the
 cluster, making them the defaults for all graph executions.
 
 ```c#
-var dseCluster = DseCluster.Builder()
+var cluster = Cluster.Builder()
     .AddContactPoint("127.0.0.1")
     .WithGraphOptions(new GraphOptions().SetName("demo"))
     .Build();
@@ -136,7 +135,7 @@ That way all traversals created from the `GraphTraversalSource` instance will be
 
 [glv]: http://tinkerpop.apache.org/docs/3.2.9/reference/#gremlin-DotNet
 [gremlin-terminal]: http://tinkerpop.apache.org/docs/current/reference/#terminal-steps
-[dse-driver]: http://docs.datastax.com/en/developer/csharp-driver-dse/latest/
+[driver]: http://docs.datastax.com/en/developer/csharp-driver/latest/
 [enum]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/enum
 [using-static]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-static
-[graph-options]: http://docs.datastax.com/en/developer/csharp-driver-dse/latest/features/graph-support/#graph-options
+[graph-options]: http://docs.datastax.com/en/developer/csharp-driver/latest/features/graph-support/#graph-options

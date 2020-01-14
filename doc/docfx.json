@@ -4,7 +4,7 @@
       "src": [
         {
           "files": [
-            "src/Dse.Graph/Dse.Graph.csproj"
+            "src/Cassandra.DataStax.Graph/Cassandra.DataStax.Graph.csproj"
           ],
           "exclude": [ "**/bin/**", "**/obj/**" ],
           "src": ".."
@@ -19,10 +19,11 @@
         "files": [ "api/*.yml" ]
       }
     ],
+    "template": "statictoc",
     "dest": "api-docs-web",
     "globalMetadata": {
-      "_appTitle": "DataStax Enterprise C# Driver Extensions for DSE Graph",
-      "_appFooter": "Copyright 2018 DataStax",
+      "_appTitle": "DataStax C# Graph Extension",
+      "_appFooter": "Copyright © DataStax",
       "_appLogoPath": "http://docs.datastax.com/en/assets/images/logo.png",
       "_disableContribution": true
     }

@@ -1,1 +1,1 @@
-dotnet pack src\Dse.Graph -c Release
+dotnet pack src\Cassandra.DataStax.Graph -c Release

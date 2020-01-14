@@ -42,3 +42,6 @@ _ReSharper*/
 
 # Visual Studio for Mac
 *.userprefs
+
+doc/api
+doc/api-docs-web

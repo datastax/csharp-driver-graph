@@ -1,6 +1,6 @@
 # Batch Support
 
-The `Dse.Graph` package supports batching multiple graph updates into a single transaction. All mutations included
+The `CassandraCSharpDriver.Graph` package supports batching multiple graph updates into a single transaction. All mutations included
 in a batch will be applied if the execution completes successfully or none of them if any of the operations fails.
 
 Use the `DseGraph.Batch()` method to create a `ITraversalBatch` instance.
@@ -18,7 +18,7 @@ batch
 ```
 
 Once you've added all the mutations to the batch, you can use `ExecuteGraph(ITraversalBatch)` or
-`ExecuteGraphAsync(ITraversalBatch)` extension methods of the `IDseSession` defined in this package.
+`ExecuteGraphAsync(ITraversalBatch)` extension methods of the `ISession` defined in this package.
 
 ```c#
 GraphResultSet result = session.ExecuteGraph(batch);
@@ -35,21 +35,21 @@ var batch = DseGraph.Batch(options);
 
 These options are going to be used when creating a `GraphStatement` internally and executing the batch.
 
-Note that options defined at `GraphTraversalSource` level are going to be ignored for batch executions. 
+Note that options defined at `GraphTraversalSource` level are going to be ignored for batch executions.
 
 ## Complete code sample
 
 ```c#
-using Dse;
-using Dse.Graph;
+using Cassandra;
+using Cassandra.DataStax.Graph;
 using Gremlin.Net;
 using Gremlin.Net.Process.Traversal;
 
-namespace Dse.Graph.Samples
+namespace Cassandra.DataStax.Graph.Samples
 {
     public static class SampleBatchExecution
     {
-        public static void ExecuteBatchSample(IDseSession session)
+        public static void ExecuteBatchSample(ISession session)
         {
             var g = DseGraph.Traversal(session);
 

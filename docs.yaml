@@ -1,5 +1,5 @@
-title: DataStax Enterprise C# Driver Extensions for DSE Graph
-summary: DataStax Enterprise C# Driver Extensions for DSE Graph
+title: DataStax C# Graph Extension
+summary: DataStax C# Graph Extension
 theme:    datastax
 swiftype_drivers: csharpdrivers
 sections:
@@ -15,6 +15,10 @@ sections:
     prefix:   /changelog
     type:     markdown
     files:    'doc/changelog/**/*.md'
+  - title:    Upgrade from the DSE driver
+    prefix:   /upgrade-from-dse-driver
+    type:     markdown
+    files:    'doc/upgrade-from-dse-driver/**/*.md'
 links:
   - title: Issues
     href:  https://datastax-oss.atlassian.net/projects/CSHARP/issues
@@ -23,7 +27,7 @@ links:
   - title: Slack Channel
     href:  https://academy.datastax.com/slack
   - title: Nuget Package
-    href:  https://www.nuget.org/packages/Dse.Graph
+    href:  https://www.nuget.org/packages/CassandraCSharpDriver.Graph
 api_docs:
   1.0: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.0/
   1.1: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.0/
