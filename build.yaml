@@ -1,9 +1,9 @@
 os:
   - ubuntu/bionic64/csharp-driver
 cassandra:
-  - dse-5.0
   - dse-5.1
   - dse-6.0
+  - dse-6.7
 build:
   - script: |
       # Set the Java paths (for CCM)
@@ -37,11 +37,11 @@ build:
       # Run the tests
       echo "==========RUNNING FULL SUITE OF TESTS=========="
       echo "==========RUNNING SUITE OF UNIT TESTS=========="
-      dotnet test src/Dse.Graph.Test.Unit/Dse.Graph.Test.Unit.csproj -f netcoreapp2.0  -c Release --logger "trx;LogFileName=../../../TestResultUnit.trx"
+      dotnet test src/Cassandra.DataStax.Graph.Test.Unit/Cassandra.DataStax.Graph.Test.Unit.csproj -f netcoreapp2.0  -c Release --logger "trx;LogFileName=../../../TestResultUnit.trx"
       echo "==========Transforming unit test result trx file to junit=========="
       java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit.trx tools/trx-to-junit.xslt
       echo "==========RUNNING SUITE OF INTEGRATION TESTS=========="
-      dotnet test src/Dse.Graph.Test.Integration/Dse.Graph.Test.Integration.csproj -f netcoreapp2.0  -c Release --logger "trx;LogFileName=../../../TestResultIntegration.trx"
+      dotnet test src/Cassandra.DataStax.Graph.Test.Integration/Cassandra.DataStax.Graph.Test.Integration.csproj -f netcoreapp2.0  -c Release --logger "trx;LogFileName=../../../TestResultIntegration.trx"
       echo "==========Transforming integration test result trx file to junit=========="
       java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration.trx tools/trx-to-junit.xslt
   - xunit:
