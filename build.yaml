@@ -96,11 +96,11 @@ build:
           # Run the tests
           echo "==========RUNNING FULL SUITE OF TESTS=========="
           echo "==========RUNNING SUITE OF UNIT TESTS=========="
-          dotnet test src/Cassandra.DataStax.Graph.Test.Unit/Cassandra.DataStax.Graph.Test.Unit.csproj -f $DOTNET_VERSION  -c Release --logger "xunit;LogFileName=../../../TestResultUnit_xunit.xml" || error=true
+          dotnet test src/Cassandra.DataStax.Graph.Test.Unit/Cassandra.DataStax.Graph.Test.Unit.csproj -f $DOTNET_VERSION  -c Release --logger "xunit;LogFilePath=../../TestResultUnit_xunit.xml" || error=true
           echo "==========Transforming unit test result trx file to junit=========="
           java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit_xunit.xml tools/JUnitXml.xslt
           echo "==========RUNNING SUITE OF INTEGRATION TESTS=========="
-          dotnet test src/Cassandra.DataStax.Graph.Test.Integration/Cassandra.DataStax.Graph.Test.Integration.csproj -f $DOTNET_VERSION  -c Release --logger "xunit;LogFileName=../../../TestResultIntegration_xunit.xml" || error=true
+          dotnet test src/Cassandra.DataStax.Graph.Test.Integration/Cassandra.DataStax.Graph.Test.Integration.csproj -f $DOTNET_VERSION  -c Release --logger "xunit;LogFilePath=../../TestResultIntegration_xunit.xml" || error=true
           echo "==========Transforming integration test result trx file to junit=========="
           java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration_xunit.xml tools/JUnitXml.xslt
 
