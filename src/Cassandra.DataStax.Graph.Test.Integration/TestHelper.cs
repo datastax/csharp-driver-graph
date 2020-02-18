@@ -16,10 +16,6 @@
 
 using System;
 
-#if NETCORE
-using Microsoft.DotNet.InternalAbstractions;
-#endif
-
 namespace Cassandra.DataStax.Graph.Test.Integration
 {
     public static class TestHelper
@@ -28,7 +24,6 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         {
             get
             {
-#if !NETCORE
                 switch (Environment.OSVersion.Platform)
                 {
                     case PlatformID.Win32NT:
@@ -37,9 +32,6 @@ namespace Cassandra.DataStax.Graph.Test.Integration
                         return true;
                 }
                 return false;
-#else
-                return RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows;
-#endif
             }
         }
 

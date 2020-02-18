@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Description>This package builds on the DataStax C# Driver for Apache Cassandra, adding functionality for interacting with DataStax Graph features using Apache TinkerPop Gremlin.Net.</Description>
     <Copyright>Copyright © by DataStax</Copyright>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <!-- Assembly version should remain constant until the next major -->
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
@@ -19,7 +19,6 @@
     <PackageTags>dse;datastax;driver;client;graph;graphdb;database;nosql;dotnet;netcore;db</PackageTags>
     <PackageLicenseUrl>https://github.com/datastax/csharp-driver-graph/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>http://docs.datastax.com/en/developer/csharp-dse-graph/latest/</PackageProjectUrl>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CassandraCSharpDriver" Version="3.13.0" />
