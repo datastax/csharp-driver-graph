@@ -8,6 +8,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="SSH.NET" Version="2016.0.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <PackageReference Include="XunitXml.TestLogger" Version="2.1.26" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="Microsoft.CSharp" />

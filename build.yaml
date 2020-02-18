@@ -3,6 +3,27 @@ schedules:
     schedule: per_commit
     notify:
       slack: csharp-driver-dev-bots
+    matrix:
+      exclude:
+      # on linux with mono target dse-6.7
+        - os: 'ubuntu/bionic64/csharp-driver'
+          dotnet: ['mono']
+          cassandra: ['dse-5.0', 'dse-5.1', 'dse-6.0', 'dse-6.8.0']
+  nightly:
+    # nightly job for primary branches to run almost all configs on ubuntu.
+    schedule: nightly
+    notify:
+      slack: csharp-driver-dev-bots
+    branches:
+      # regex matches primary branch format (2.1, 3.x, 3.0.x, 3.1.x, master, etc).
+      include: ["/((\\d+(\\.[\\dx]+)+)|master)/"]
+  adhoc:
+    # adhoc job for non-primary braches that doesn't have the nightly and weekly schedules so this may be used to run same configs as the weekly schedule.
+    schedule: adhoc
+    notify:
+      slack: csharp-driver-dev-bots
+    branches:
+      exclude: ["/((\\d+(\\.[\\dx]+)+)|master)/"]
 os:
   - ubuntu/bionic64/csharp-driver
 cassandra:
@@ -12,6 +33,7 @@ cassandra:
   - dse-6.8.0
 dotnet:
   - 'netcoreapp2.1'
+  - 'mono'
 build:
   - script: |
       # Set the Java paths (for CCM)
@@ -34,23 +56,58 @@ build:
       mkdir saxon
       curl -L -o saxon/SaxonHE9-8-0-12J.zip https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.8/SaxonHE9-8-0-12J.zip
       unzip saxon/SaxonHE9-8-0-12J.zip -d saxon
+      if [ $DOTNET_VERSION = 'mono' ]; then      
+          echo "========== Starting Mono Build =========="
+          mono --version
+          # Define alias for Nuget
+          nuget() {
+                mono /usr/local/bin/nuget.exe "$@"
+          }
+          export -f nuget
 
-      export DOTNET_CLI_TELEMETRY_OUTPUT=1
-      dotnet --version
+          # Install the required packages
+          nuget install NUnit.Runners -Version 3.6.1 -OutputDirectory testrunner
 
-      # Install the required packages
-      echo "==========Install the required packages=========="
-      dotnet restore src
+          # Compile the driver and test code
+          msbuild /t:restore /v:m src/Cassandra.DataStax.Graph.sln
+          msbuild /p:Configuration=Release /v:m /p:DynamicConstants=LINUX src/Cassandra.DataStax.Graph.sln
 
-      # Run the tests
-      echo "==========RUNNING FULL SUITE OF TESTS=========="
-      echo "==========RUNNING SUITE OF UNIT TESTS=========="
-      dotnet test src/Cassandra.DataStax.Graph.Test.Unit/Cassandra.DataStax.Graph.Test.Unit.csproj -f $DOTNET_VERSION  -c Release --logger "trx;LogFileName=../../../TestResultUnit.trx"
-      echo "==========Transforming unit test result trx file to junit=========="
-      java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit.trx tools/trx-to-junit.xslt
-      echo "==========RUNNING SUITE OF INTEGRATION TESTS=========="
-      dotnet test src/Cassandra.DataStax.Graph.Test.Integration/Cassandra.DataStax.Graph.Test.Integration.csproj -f $DOTNET_VERSION  -c Release --logger "trx;LogFileName=../../../TestResultIntegration.trx"
-      echo "==========Transforming integration test result trx file to junit=========="
-      java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration.trx tools/trx-to-junit.xslt
+          # Run the unit tests
+          mono ./testrunner/NUnit.ConsoleRunner.3.6.1/tools/nunit3-console.exe src/Cassandra.DataStax.Graph.Test.Unit/bin/Release/net461/Cassandra.DataStax.Graph.Test.Unit.dll --where "cat != long && cat != memory" --labels=All --result:"TestResultUnit_nunit.xml" || error=true
+          java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit_nunit.xml tools/nunit3-junit.xslt
+          
+          # Run the integration tests
+          mono ./testrunner/NUnit.ConsoleRunner.3.6.1/tools/nunit3-console.exe src/Cassandra.DataStax.Graph.Test.Integration/bin/Release/net461/Cassandra.DataStax.Graph.Test.Integration.dll --where "cat != long && cat != memory" --labels=All --result:"TestResultIntegration_nunit.xml" || error=true
+          java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration_nunit.xml tools/nunit3-junit.xslt
+          
+          #Fail the build if there was an error
+          if [ $error ]
+          then 
+              exit -1
+          fi
+      else
+          export DOTNET_CLI_TELEMETRY_OUTPUT=1
+          dotnet --version
+
+          # Install the required packages
+          echo "==========Install the required packages=========="
+          dotnet restore src
+
+          # Run the tests
+          echo "==========RUNNING FULL SUITE OF TESTS=========="
+          echo "==========RUNNING SUITE OF UNIT TESTS=========="
+          dotnet test src/Cassandra.DataStax.Graph.Test.Unit/Cassandra.DataStax.Graph.Test.Unit.csproj -f $DOTNET_VERSION  -c Release --logger "xunit;LogFileName=../../../TestResultUnit_xunit.xml" || error=true
+          echo "==========Transforming unit test result trx file to junit=========="
+          java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit_xunit.xml tools/JUnitXml.xslt
+          echo "==========RUNNING SUITE OF INTEGRATION TESTS=========="
+          dotnet test src/Cassandra.DataStax.Graph.Test.Integration/Cassandra.DataStax.Graph.Test.Integration.csproj -f $DOTNET_VERSION  -c Release --logger "xunit;LogFileName=../../../TestResultIntegration_xunit.xml" || error=true
+          echo "==========Transforming integration test result trx file to junit=========="
+          java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration_xunit.xml tools/JUnitXml.xslt
+
+          if [ $error ]
+          then 
+              exit -1
+          fi
+      fi
   - xunit:
-    - "TestResult*.xml"
+    - "**/TestResult*.xml"

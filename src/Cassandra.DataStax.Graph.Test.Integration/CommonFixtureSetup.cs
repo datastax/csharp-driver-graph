@@ -14,6 +14,7 @@
 //   limitations under the License.
 //
 
+using System;
 using Cassandra.DataStax.Graph.Test.Integration.TestClusterManagement;
 using NUnit.Framework;
 
@@ -81,7 +82,10 @@ namespace Cassandra.DataStax.Graph.Test.Integration
 
         private void CreateDefaultGraph(ISession session)
         {
-            session.ExecuteGraph(new SimpleGraphStatement($"system.graph('{CommonFixtureSetup.GraphName}').ifNotExists().create()"));
+            session.ExecuteGraph(new SimpleGraphStatement($"system.graph('{CommonFixtureSetup.GraphName}')" +
+                                                          ".ifNotExists()" +
+                                                          (TestClusterManager.DseVersion < new Version(6, 8) ? string.Empty : ".engine(Classic)") +
+                                                          ".create()"));
             session.ExecuteGraph(new SimpleGraphStatement(CommonFixtureSetup.MakeStrict).SetGraphName(CommonFixtureSetup.GraphName));
             session.ExecuteGraph(new SimpleGraphStatement(CommonFixtureSetup.AllowScans).SetGraphName(CommonFixtureSetup.GraphName));
             session.ExecuteGraph(new SimpleGraphStatement(CommonFixtureSetup.ClassicSchemaGremlinQuery).SetGraphName(CommonFixtureSetup.GraphName));
