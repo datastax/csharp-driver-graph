@@ -43,5 +43,6 @@ _ReSharper*/
 # Visual Studio for Mac
 *.userprefs
 
-doc/api
-doc/api-docs-web
+doc/api-docs/api-docs
+doc/api-docs/api
+doc/api-docs/datastax-template
