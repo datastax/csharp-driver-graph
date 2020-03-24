@@ -1,0 +1,53 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "src/Cassandra.DataStax.Graph/Cassandra.DataStax.Graph.csproj"
+          ],
+          "exclude": [ "**/bin/**", "**/obj/**" ],
+          "src": "../.."
+        }
+      ],
+      "dest": "api",
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "properties": {
+          "TargetFramework": "netstandard2.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/**.yml",
+          "api/index.md"
+        ]
+      },
+	  {
+		"files": [ "index.md", "toc.yml" ]
+	  }
+    ],
+    "dest": "api-docs",
+    "globalMetadataFiles": [],
+    "fileMetadataFiles": [],
+    "template": [
+      "statictoc",
+	  "datastax-template"
+    ],
+	"globalMetadata": {
+      "_appTitle": "DataStax C# Graph Extension",
+      "_enableSearch": true,
+	  "_disableContribution": true,
+	  "_appFooter": "© DataStax, All rights reserved."
+    },
+    "postProcessors": [],
+    "markdownEngineName": "markdig",
+    "noLangKeyword": false,
+    "keepFileLink": false,
+    "cleanupCacheHistory": true,
+    "disableGitFeatures": false
+  }
+}
