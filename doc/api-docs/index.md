@@ -1,5 +1,5 @@
 ---
-project: Cassandra.Datastax.Graph
+project: Cassandra.DataStax.Graph
 documentType: index
 ---
 <div></div>
