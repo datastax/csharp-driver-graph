@@ -136,7 +136,7 @@ That way all traversals created from the `GraphTraversalSource` instance will be
 
 [glv]: http://tinkerpop.apache.org/docs/3.2.7/reference/#gremlin-DotNet
 [gremlin-terminal]: http://tinkerpop.apache.org/docs/current/reference/#terminal-steps
-[dse-driver]: https://github.com/datastax/csharp-dse-driver
+[dse-driver]: http://docs.datastax.com/en/developer/csharp-driver-dse/latest/
 [enum]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/enum
 [using-static]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-static
 [graph-options]: http://docs.datastax.com/en/developer/csharp-driver-dse/latest/features/graph-support/#graph-options
