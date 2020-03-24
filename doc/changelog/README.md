@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0
+
+2020-03-24
+
+### Features
+
+*   [[CSHARP-865](https://datastax-oss.atlassian.net/browse/CSHARP-865)] - Graph extensions: Bump core driver dependency to 3.14.0
+*   [[CSHARP-867](https://datastax-oss.atlassian.net/browse/CSHARP-867)] - Bump .NET Standard 1.5 to .NET Standard 2.0 on the Graph extension
+*   [[CSHARP-866](https://datastax-oss.atlassian.net/browse/CSHARP-866)] - Update System.Net.WebSockets.Client to fix vulnerabilities
+
 ## 2.0.0
 
 2020-01-15
