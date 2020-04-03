@@ -185,7 +185,7 @@ def buildDriver() {
 def executeUnitTests(perCommitSchedule) {
     
   if (env.OS_VERSION.split('/')[0] == 'win') {
-    catchError {
+    catchError(stageResult: 'FAILURE') {
       powershell label: "Execute unit tests for ${env.DOTNET_VERSION}", script: '''
         . $env:HOME\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1
         . $Env:HOME\\driver-environment.ps1
@@ -197,7 +197,7 @@ def executeUnitTests(perCommitSchedule) {
     '''
   } else {
     if (env.DOTNET_VERSION == 'mono') {
-      catchError {
+      catchError(stageResult: 'FAILURE') {
         sh label: 'Execute unit tests for mono', script: '''#!/bin/bash -le
           # Load CCM and driver configuration environment variables
           set -o allexport
@@ -211,7 +211,7 @@ def executeUnitTests(perCommitSchedule) {
         java -jar saxon/saxon9he.jar -o:TestResultUnit.xml TestResultUnit_nunit.xml tools/nunit3-junit.xslt
       '''
     } else {
-      catchError {
+      catchError(stageResult: 'FAILURE') {
         sh label: "Execute unit tests for ${env.DOTNET_VERSION}", script: '''#!/bin/bash -le
           # Load CCM and driver configuration environment variables
           set -o allexport
@@ -231,7 +231,7 @@ def executeUnitTests(perCommitSchedule) {
 def executeIntegrationTests(perCommitSchedule) {
     
   if (env.OS_VERSION.split('/')[0] == 'win') {    
-    catchError {
+    catchError(stageResult: 'FAILURE') {
       powershell label: "Execute integration tests for ${env.DOTNET_VERSION}", script: '''
         . $env:HOME\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1
         . $Env:HOME\\driver-environment.ps1
@@ -243,7 +243,7 @@ def executeIntegrationTests(perCommitSchedule) {
     '''
   } else {
     if (env.DOTNET_VERSION == 'mono') {
-      catchError {
+      catchError(stageResult: 'FAILURE') {
         sh label: 'Execute integration tests for mono', script: '''#!/bin/bash -le
           # Load CCM and driver configuration environment variables
           set -o allexport
@@ -257,7 +257,7 @@ def executeIntegrationTests(perCommitSchedule) {
         java -jar saxon/saxon9he.jar -o:TestResultIntegration.xml TestResultIntegration_nunit.xml tools/nunit3-junit.xslt
       '''
     } else {
-      catchError {
+      catchError(stageResult: 'FAILURE') {
         sh label: "Execute integration tests for ${env.DOTNET_VERSION}", script: '''#!/bin/bash -le
           # Load CCM and driver configuration environment variables
           set -o allexport
