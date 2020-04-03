@@ -166,8 +166,8 @@ def buildDriver() {
   } else {
     if (env.DOTNET_VERSION == 'mono') {
       sh label: 'Build the driver for mono', script: '''#!/bin/bash -le
-        msbuild /t:restore /v:m src/Dse.sln
-        msbuild /p:Configuration=Release /v:m /p:DynamicConstants=LINUX src/Dse.sln
+        msbuild /t:restore /v:m src/Cassandra.DataStax.Graph.sln
+        msbuild /p:Configuration=Release /v:m /p:DynamicConstants=LINUX src/Cassandra.DataStax.Graph.sln
       '''
     } else {
       sh label: "Work around nuget issue", script: '''#!/bin/bash -le
