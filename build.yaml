@@ -1,6 +1,6 @@
 schedules:
   commit:
-    schedule: per_commit
+    schedule: adhoc
     notify:
       slack: csharp-driver-dev-bots
     matrix:
@@ -11,7 +11,7 @@ schedules:
           cassandra: ['dse-5.0', 'dse-5.1', 'dse-6.0', 'dse-6.8.0']
   nightly:
     # nightly job for primary branches to run almost all configs on ubuntu.
-    schedule: nightly
+    schedule: adhoc
     notify:
       slack: csharp-driver-dev-bots
     branches:
