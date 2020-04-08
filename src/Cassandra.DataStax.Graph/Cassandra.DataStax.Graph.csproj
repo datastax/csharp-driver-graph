@@ -24,6 +24,8 @@
     <PackageReference Include="CassandraCSharpDriver" Version="3.14.0" />
     <PackageReference Include="Gremlin.Net" Version="[3.2.9]" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.2" />
+    <PackageReference Include="System.Net.Security" Version="4.3.2" />
     <!-- 
     Gremlin.Net package depends on System.Net.WebSockets.Client which contains vulnerabilities.
     Force WebSockets dependency to be higher than 4.3.2. This should be removed once Gremlin.Net package is updated.
