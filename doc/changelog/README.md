@@ -1,5 +1,15 @@
 # Changelog
 
+Changelog for the DataStax C# Graph Extension.
+
+## 2.1.1
+
+2020-05-12
+
+### Improvement
+
+*   [[CSHARP-893](https://datastax-oss.atlassian.net/browse/CSHARP-893)] - Upgrade dependencies of C# Graph Extension to fix security vulnerabilities
+
 ## 2.1.0
 
 2020-03-24

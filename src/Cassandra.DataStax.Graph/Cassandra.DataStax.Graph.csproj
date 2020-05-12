@@ -5,8 +5,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <!-- Assembly version should remain constant until the next major -->
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.1.0.0</FileVersion>
-    <VersionPrefix>2.1.0</VersionPrefix>
+    <FileVersion>2.1.1.0</FileVersion>
+    <VersionPrefix>2.1.1</VersionPrefix>
     <Authors>DataStax</Authors>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile Condition="'$(Configuration)'=='Release'">true</GenerateDocumentationFile>
