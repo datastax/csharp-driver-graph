@@ -16,6 +16,7 @@
 
 using System;
 using System.Threading.Tasks;
+
 using Gremlin.Net.Process.Traversal;
 
 namespace Cassandra.DataStax.Graph
@@ -26,7 +27,7 @@ namespace Cassandra.DataStax.Graph
     public static class DseGraph
     {
         /// <summary>
-        /// Creates a new Apache TinkerPop's <c>GraphTraversalSource</c> instance, that can be used to build 
+        /// Creates a new Apache TinkerPop's <c>GraphTraversalSource</c> instance, that can be used to build
         /// <c>GraphTraversal</c> instances.
         /// </summary>
         /// <param name="session">
@@ -46,15 +47,16 @@ namespace Cassandra.DataStax.Graph
             {
                 throw new ArgumentNullException(nameof(session));
             }
+
             return new GraphTraversalSource().WithRemote(new DseRemoteConnection(session, graphOptions));
         }
 
         /// <summary>
-        /// Creates an initialized <see cref="IGraphStatement"/> from a <c>GraphTraversal</c> to use directly with a 
+        /// Creates an initialized <see cref="IGraphStatement"/> from a <c>GraphTraversal</c> to use directly with a
         /// <see cref="ISession"/>.
         /// <para>
         /// Note that the <c>IGraphStatement</c> will use the default <c>GraphOptions</c> at cluster level and not the
-        /// ones defined on the <c>GraphTraversalSource</c>. 
+        /// ones defined on the <c>GraphTraversalSource</c>.
         /// </para>
         /// </summary>
         public static IGraphStatement StatementFromTraversal(ITraversal traversal)
@@ -63,8 +65,8 @@ namespace Cassandra.DataStax.Graph
             {
                 throw new ArgumentNullException(nameof(traversal));
             }
-            var query = DseRemoteConnection.Writer.WriteObject(traversal.Bytecode);
-            return DseRemoteConnection.CreateStatement(query, null);
+
+            return DseRemoteConnection.CreateStatement(traversal.Bytecode, null, false);
         }
 
         /// <summary>

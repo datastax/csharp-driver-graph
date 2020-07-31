@@ -16,42 +16,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+
 using Cassandra.DataStax.Graph.Serialization;
-using Cassandra.Geometry;
+
 using Gremlin.Net.Process.Remote;
 using Gremlin.Net.Process.Traversal;
-using Gremlin.Net.Structure.IO.GraphSON;
-using Newtonsoft.Json.Linq;
 
 namespace Cassandra.DataStax.Graph
 {
     internal class DseRemoteConnection : IRemoteConnection
     {
-        private static readonly ITypeSerializer[] CustomSerializers =
-        {
-            new DurationSerializer(),
-            new TypeSerializer<LocalDate>("gx", "LocalDate", LocalDate.Parse),
-            new TypeSerializer<LocalTime>("gx", "LocalTime", LocalTime.Parse),
-            new TypeSerializer<Point>("dse", "Point", Point.Parse),
-            new TypeSerializer<LineString>("dse", "LineString", LineString.Parse),
-            new TypeSerializer<Polygon>("dse", "Polygon", Polygon.Parse),
-            new ByteArraySerializer(),
-            new DateTimeOffsetSerializer("g", "Timestamp"),
-            new DateTimeOffsetSerializer("gx", "Instant"),
-            new GraphNodeSerializer()
-        };
-
-        private static readonly GraphSONReader Reader = new GraphSONReader(DseRemoteConnection.CustomSerializers
-            .Where(s => s.FullTypeName != null).ToDictionary(s => s.FullTypeName, s => (IGraphSONDeserializer) s));
-
-        internal static readonly GraphSONWriter Writer = new GraphSONWriter(
-            DseRemoteConnection.CustomSerializers.GroupBy(s => s.Type).Select(g => g.First())
-                             .ToDictionary(s => s.Type, s => (IGraphSONSerializer) s));
-        
         private const string GraphLanguage = "bytecode-json";
-        
+
         private readonly GraphOptions _graphOptions;
         private readonly ISession _session;
 
@@ -63,27 +40,41 @@ namespace Cassandra.DataStax.Graph
 
         public async Task<ITraversal<TStart, TEnd>> SubmitAsync<TStart, TEnd>(Bytecode bytecode)
         {
-            var query = DseRemoteConnection.Writer.WriteObject(bytecode);
-            var graphStatement = DseRemoteConnection.CreateStatement(query, _graphOptions);
-            var rs = await _session.ExecuteGraphAsync(graphStatement);
+            var graphStatement = DseRemoteConnection.CreateStatement(bytecode, _graphOptions, true);
+            var rs = await _session.ExecuteGraphAsync(graphStatement).ConfigureAwait(false);
             var graphTraversal = new GraphTraversal<TStart, TEnd>
             {
-                Traversers = GetTraversers(rs)
+                Traversers = GetTraversers<TEnd>(rs)
             };
             return graphTraversal;
         }
 
-        internal static IGraphStatement CreateStatement(string query, GraphOptions graphOptions)
+        internal static IGraphStatement CreateStatement(
+            object queryBytecode, GraphOptions graphOptions, bool customDeserializers)
         {
-            var graphStatement = new SimpleGraphStatement(query).SetGraphLanguage(DseRemoteConnection.GraphLanguage);
+            IGraphStatement graphStatement;
+            if (customDeserializers)
+            {
+                graphStatement = new FluentGraphStatement(
+                    queryBytecode, GraphSONUtils.CustomSerializers, GraphSONUtils.CustomDeserializers);
+            }
+            else
+            {
+                graphStatement = new FluentGraphStatement(queryBytecode, GraphSONUtils.CustomSerializers);
+            }
+
+            graphStatement = graphStatement.SetGraphLanguage(DseRemoteConnection.GraphLanguage);
+
             if (graphOptions == null)
             {
                 return graphStatement;
             }
+
             graphStatement
                 .SetGraphSource(graphOptions.Source)
                 .SetGraphName(graphOptions.Name)
                 .SetReadTimeoutMillis(graphOptions.ReadTimeoutMillis);
+
             if (graphOptions.ReadConsistencyLevel != null)
             {
                 graphStatement.SetGraphReadConsistencyLevel(graphOptions.ReadConsistencyLevel.Value);
@@ -92,22 +83,16 @@ namespace Cassandra.DataStax.Graph
             {
                 graphStatement.SetGraphWriteConsistencyLevel(graphOptions.WriteConsistencyLevel.Value);
             }
+
             return graphStatement;
         }
 
-        private IEnumerable<Traverser> GetTraversers(GraphResultSet rs)
+        private IEnumerable<Gremlin.Net.Process.Traversal.Traverser> GetTraversers<TEnd>(GraphResultSet rs)
         {
             foreach (var graphNode in rs)
             {
-                yield return new Traverser(AdaptGraphNode(graphNode));
+                yield return new Gremlin.Net.Process.Traversal.Traverser(graphNode.To<TEnd>());
             }
-        }
-
-        private object AdaptGraphNode(GraphNode graphNode)
-        {
-            // Avoid using conversion to JToken TINKERPOP-1696 is implemented
-            var json = (JToken) graphNode.GetRaw();
-            return DseRemoteConnection.Reader.ToObject(json);
         }
     }
 }

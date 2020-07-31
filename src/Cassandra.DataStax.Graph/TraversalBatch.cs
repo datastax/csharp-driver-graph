@@ -50,8 +50,8 @@ namespace Cassandra.DataStax.Graph
             {
                 throw new InvalidOperationException("Batch does not contain traversals");
             }
-            var query = DseRemoteConnection.Writer.WriteObject(_list.Select(t => t.Bytecode).ToArray());
-            return DseRemoteConnection.CreateStatement(query, _options);
+
+            return DseRemoteConnection.CreateStatement(_list.Select(t => t.Bytecode), _options, false);
         }
     }
 }

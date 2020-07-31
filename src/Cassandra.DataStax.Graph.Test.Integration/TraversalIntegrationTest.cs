@@ -50,15 +50,17 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             {
                 var typeDef = $"{type}()";
                 if (TestClusterManager.DseVersion >= new Version(5, 1))
-                switch (type)
                 {
-                    case "Point":
-                        typeDef = $"{type}().withBounds(-40, -40, 40, 40)";
-                        break;
-                    case "Linestring":
-                    case "Polygon":
-                        typeDef = $"{type}().withGeoBounds()";
-                        break;
+                    switch (type)
+                    {
+                        case "Point":
+                            typeDef = $"{type}().withBounds(-40, -40, 40, 40)";
+                            break;
+                        case "Linestring":
+                        case "Polygon":
+                            typeDef = $"{type}().withGeoBounds()";
+                            break;
+                    }
                 }
                 else
                 {

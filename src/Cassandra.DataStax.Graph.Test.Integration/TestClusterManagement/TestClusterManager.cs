@@ -109,7 +109,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration.TestClusterManagement
                 {
                     return TestClusterManager._executor;
                 }
-                var dseRemote = bool.Parse(Environment.GetEnvironmentVariable("DSE_IN_REMOTE_SERVER") ?? "true");
+                var dseRemote = bool.Parse(Environment.GetEnvironmentVariable("DSE_IN_REMOTE_SERVER") ?? "false");
                 if (!dseRemote)
                 {
                     TestClusterManager._executor = LocalCcmProcessExecuter.Instance;

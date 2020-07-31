@@ -15,6 +15,9 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Gremlin.Net.Process.Traversal;
 using Moq;
 using NUnit.Framework;
 
@@ -64,9 +67,9 @@ namespace Cassandra.DataStax.Graph.Test.Unit
                 var g = DseGraph.Traversal(session);
                 session.ExecuteGraph(g.V());
                 Assert.NotNull(statement);
-                Assert.IsInstanceOf<SimpleGraphStatement>(statement);
-                var s = (SimpleGraphStatement) statement;
-                StringAssert.Contains("g:Bytecode", s.Query);
+                Assert.IsInstanceOf<FluentGraphStatement>(statement);
+                var s = (FluentGraphStatement) statement;
+                Assert.IsInstanceOf<Bytecode>(s.QueryBytecode);
             });
         }
 
@@ -78,9 +81,9 @@ namespace Cassandra.DataStax.Graph.Test.Unit
                 var g = DseGraph.Traversal(session);
                 session.ExecuteGraphAsync(g.V());
                 Assert.NotNull(statement);
-                Assert.IsInstanceOf<SimpleGraphStatement>(statement);
-                var s = (SimpleGraphStatement) statement;
-                StringAssert.Contains("g:Bytecode", s.Query);
+                Assert.IsInstanceOf<FluentGraphStatement>(statement);
+                var s = (FluentGraphStatement) statement;
+                Assert.IsInstanceOf<Bytecode>(s.QueryBytecode);
             });
         }
 
@@ -100,16 +103,14 @@ namespace Cassandra.DataStax.Graph.Test.Unit
                     .Add(g.AddV("person").Property("name", "Olivia").Property("age", 8));
                 session.ExecuteGraph(batch);
                 Assert.NotNull(statement);
-                Assert.IsInstanceOf<SimpleGraphStatement>(statement);
-                var query = ((SimpleGraphStatement) statement).Query;
+                Assert.IsInstanceOf<FluentGraphStatement>(statement);
+                var query = (IEnumerable<Bytecode>) ((FluentGraphStatement) statement).QueryBytecode;
                 Assert.AreEqual("bytecode-json", statement.GraphLanguage);
                 TraversalUnitTest.CompareGraphOptionsOnStatement(options, statement);
-                StringAssert.Contains(
-                    "{\"@type\":\"g:Bytecode\",\"@value\":{\"step\":[[\"addV\",\"person\"],[\"property\",\"name\",\"Matias\"],[\"property\",\"age\",{\"@type\":\"g:Int32\",\"@value\":12}]]}}",
-                    query);
-                StringAssert.Contains(
-                    "{\"@type\":\"g:Bytecode\",\"@value\":{\"step\":[[\"addV\",\"person\"],[\"property\",\"name\",\"Olivia\"],[\"property\",\"age\",{\"@type\":\"g:Int32\",\"@value\":8}]]}}",
-                    query);
+                var traversals = query.ToList();
+                Assert.AreEqual(2, traversals.Count);
+                Assert.AreEqual(3, traversals.ElementAt(0).StepInstructions.Count);
+                Assert.AreEqual(3, traversals.ElementAt(1).StepInstructions.Count);
             });
         }
 
