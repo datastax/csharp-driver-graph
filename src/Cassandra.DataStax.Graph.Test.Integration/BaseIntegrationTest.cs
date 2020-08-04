@@ -23,16 +23,27 @@ namespace Cassandra.DataStax.Graph.Test.Integration
     [TestFixture]
     public abstract class BaseIntegrationTest
     {
-        public const string DefaultGraphName = "graph1";
+        private readonly string _graphName;
+        public const string DefaultClassicGraphName = "graph1";
+        public const string DefaultCoreGraphName = "graph2";
 
         protected ICluster Cluster { get; set; }
 
         protected ISession Session { get; set; }
 
+        protected BaseIntegrationTest() : this(BaseIntegrationTest.DefaultClassicGraphName)
+        {
+        }
+
+        protected BaseIntegrationTest(string graphName)
+        {
+            _graphName = graphName;
+        }
+
         [OneTimeSetUp]
         public void BaseOneTimeSetUp()
         {   
-            var graphOptions = new GraphOptions().SetName(BaseIntegrationTest.DefaultGraphName);
+            var graphOptions = new GraphOptions().SetName(_graphName);
             if (TestClusterManager.DseVersion < new Version(5, 1))
             {
                 graphOptions.SetLanguage("bytecode-json");

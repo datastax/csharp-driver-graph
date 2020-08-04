@@ -14,6 +14,7 @@
 //   limitations under the License.
 //
 
+using System;
 using System.Threading.Tasks;
 using Cassandra.DataStax.Graph.Test.Integration.TestClusterManagement;
 using Gremlin.Net.Process.Traversal;
@@ -24,38 +25,58 @@ namespace Cassandra.DataStax.Graph.Test.Integration
     [TestDseVersion(6, 0)]
     public class BatchIntegrationTest : BaseIntegrationTest
     {
+        [TestCase(BaseIntegrationTest.DefaultCoreGraphName, GraphProtocol.GraphSON3)]
+        [TestCase(BaseIntegrationTest.DefaultClassicGraphName, GraphProtocol.GraphSON2)]
         [Test]
-        public void Should_Execute_Batch_Of_Traversals()
+        public void Should_Execute_Batch_Of_Traversals(string graphName, GraphProtocol protocol)
         {
-            var g = DseGraph.Traversal(Session);
-            var batch = DseGraph.Batch(new GraphOptions().SetWriteConsistencyLevel(ConsistencyLevel.LocalQuorum));
+            if (graphName == BaseIntegrationTest.DefaultCoreGraphName 
+                && !TestDseVersion.VersionMatch(
+                    new Version(6, 8), TestClusterManager.DseVersion, Comparison.GreaterThanOrEqualsTo))
+            {
+                Assert.Ignore("Test requires DSE 6.8");
+            }
+
+            var g = DseGraph.Traversal(Session, new GraphOptions().SetName(graphName));
+            var batch = DseGraph.Batch(new GraphOptions().SetName(graphName).SetWriteConsistencyLevel(ConsistencyLevel.LocalQuorum));
             batch
                 .Add(g.AddV("character").Property("name", "Matias").Property("age", 12).Property("tag", "batch1"))
                 .Add(g.AddV("character").Property("name", "Olivia").Property("age", 8).Property("tag", "batch1"));
 
-            Session.ExecuteGraph(batch);
+            var rs = Session.ExecuteGraph(batch);
+            Assert.AreEqual(protocol, rs.GraphProtocol);
 
-            var list = g.V().Has("character", "tag", "batch1").Values<string>("name").ToList();
+            var list = g.With("allow-filtering").V().Has("character", "tag", "batch1").Values<string>("name").ToList();
             CollectionAssert.AreEquivalent(new [] { "Matias", "Olivia"}, list);
         }
-
+        
+        [TestCase(BaseIntegrationTest.DefaultCoreGraphName, GraphProtocol.GraphSON3)]
+        [TestCase(BaseIntegrationTest.DefaultClassicGraphName, GraphProtocol.GraphSON2)]
         [Test]
-        public async Task Should_Execute_Batch_Of_Traversals_Asynchronously_With_Edges()
+        public async Task Should_Execute_Batch_Of_Traversals_Asynchronously_With_Edges(string graphName, GraphProtocol protocol)
         {
-            var g = DseGraph.Traversal(Session);
-            var batch = DseGraph.Batch(new GraphOptions().SetWriteConsistencyLevel(ConsistencyLevel.LocalQuorum));
+            if (graphName == BaseIntegrationTest.DefaultCoreGraphName 
+                && !TestDseVersion.VersionMatch(
+                    new Version(6, 8), TestClusterManager.DseVersion, Comparison.GreaterThanOrEqualsTo))
+            {
+                Assert.Ignore("Test requires DSE 6.8");
+            }
+
+            var g = DseGraph.Traversal(Session, new GraphOptions().SetName(graphName));
+            var batch = DseGraph.Batch(new GraphOptions().SetName(graphName).SetWriteConsistencyLevel(ConsistencyLevel.LocalQuorum));
             batch
                 .Add(g.AddV("character").Property("name", "Matias").Property("age", 12).Property("tag", "batch2"))
                 .Add(g.AddV("character").Property("name", "Olivia").Property("age", 8).Property("tag", "batch2"))
-                .Add(g.V().Has("name", "Matias").Has("tag", "batch2").AddE("knows").To(
+                .Add(g.With("allow-filtering").V().Has("name", "Matias").Has("tag", "batch2").AddE("knows").To(
                         __.V().Has("name", "Olivia").Has("tag", "batch2")));
 
-            await Session.ExecuteGraphAsync(batch);
+            var rs = await Session.ExecuteGraphAsync(batch).ConfigureAwait(false);
+            Assert.AreEqual(protocol, rs.GraphProtocol);
 
-            var characters = g.V().Has("character", "tag", "batch2").Values<string>("name").ToList();
+            var characters = g.With("allow-filtering").V().Has("character", "tag", "batch2").Values<string>("name").ToList();
             CollectionAssert.AreEquivalent(new [] { "Matias", "Olivia"}, characters);
 
-            var knowsOut = g.V().Has("name", "Matias").Has("tag", "batch2")
+            var knowsOut = g.With("allow-filtering").V().Has("name", "Matias").Has("tag", "batch2")
                                 .Out("knows").Values<string>("name").ToList();
             Assert.AreEqual(new [] { "Olivia" }, knowsOut);
         }

@@ -26,7 +26,7 @@ using NUnit.Framework;
 
 namespace Cassandra.DataStax.Graph.Test.Integration
 {
-    public class TraversalIntegrationTest : BaseIntegrationTest
+    public class TraversalCoreIntegrationTest : BaseIntegrationTest
     {
         private static readonly Tuple<string, object>[] PropertyItems =
         {
@@ -37,41 +37,23 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             Tuple.Create<string, object>("Timestamp", DateTimeOffset.Parse("2017-08-09 17:21:29+00:00")),
             Tuple.Create<string, object>("Blob", new byte[]{ 1, 2, 3 }),
             Tuple.Create<string, object>("Point", new Point(0, 1)),
-            Tuple.Create<string, object>("Linestring", 
+            Tuple.Create<string, object>("LineString", 
                 new LineString(new Point(0, 0), new Point(0, 1), new Point(1, 1))),
             Tuple.Create<string, object>("Polygon", 
                 new Polygon(new Point(-10, 10), new Point(10, 0), new Point(10, 10), new Point(-10, 10)))
         };
 
+        public TraversalCoreIntegrationTest() : base(BaseIntegrationTest.DefaultCoreGraphName)
+        {
+        }
+
         [OneTimeSetUp]
         public void FixtureSetup()
         {
-            foreach (var type in TraversalIntegrationTest.PropertyItems.Select(i => i.Item1).Distinct())
+            foreach (var type in TraversalCoreIntegrationTest.PropertyItems.Select(i => i.Item1).Distinct())
             {
-                var typeDef = $"{type}()";
-                if (TestClusterManager.DseVersion >= new Version(5, 1))
-                {
-                    switch (type)
-                    {
-                        case "Point":
-                            typeDef = $"{type}().withBounds(-40, -40, 40, 40)";
-                            break;
-                        case "Linestring":
-                        case "Polygon":
-                            typeDef = $"{type}().withGeoBounds()";
-                            break;
-                    }
-                }
-                else
-                {
-                    if (type == "Date" || type == "Time")
-                    {
-                        continue;
-                    }
-                }
-                
-                var schemaQuery = $"schema.propertyKey(propertyName).{typeDef}.ifNotExists().create();\n" +
-                                  "schema.vertexLabel(vertexLabel).properties(propertyName).ifNotExists().create();";
+                var typeDef = $"{type}";
+                var schemaQuery = $"schema.vertexLabel(vertexLabel).partitionBy('pk', UUID).property(propertyName, {typeDef}).create();";
                 var statement = new SimpleGraphStatement(schemaQuery,
                     new {vertexLabel = $"vertex{type}", propertyName = $"prop{type}"});
                 Session.ExecuteGraph(statement.SetGraphLanguage("gremlin-groovy"));
@@ -82,7 +64,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Handle_Zero_Results()
         {
             var g = DseGraph.Traversal(Session);
-            CollectionAssert.IsEmpty(g.V().HasLabel("not_existent_label").ToList());
+            CollectionAssert.IsEmpty(g.V().HasLabel("person").Has("name", Guid.NewGuid().ToString()).ToList());
         }
 
         [Test]
@@ -132,12 +114,13 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Handle_Types(string type)
         {
             var g = DseGraph.Traversal(Session);
-            foreach (var value in TraversalIntegrationTest.PropertyItems.Where(i => i.Item1 == type).Select(i => i.Item2))
+            foreach (var value in TraversalCoreIntegrationTest.PropertyItems.Where(i => i.Item1 == type).Select(i => i.Item2))
             {
                 var vertexLabel = $"vertex{type}";
                 var propertyName = $"prop{type}";
-                g.AddV(vertexLabel).Property(propertyName, value).Next();
-                var result = g.V().HasLabel(vertexLabel).Has(propertyName, value)
+                var pk = Guid.NewGuid();
+                g.AddV(vertexLabel).Property("pk", pk).Property(propertyName, value).Next();
+                var result = g.With("allow-filtering").V().HasLabel(vertexLabel).Has("pk", pk).Has(propertyName, value)
                     .Values<object>(propertyName).Next();
                 Assert.AreEqual(value, result);
             }
@@ -166,7 +149,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Use_Edge_Id_As_Parameter()
         {
             var g = DseGraph.Traversal(Session);
-            var edges = g.E().HasLabel("knows").Has("weight", 0.5f).ToList();
+            var edges = g.With("allow-filtering").E().HasLabel("knows").Has("weight", 0.5f).ToList();
             Assert.AreEqual(1, edges.Count);
             var knowEdge = edges.First();
             var knowEdgeByIdResult = g.E(knowEdge.Id).ToList();
@@ -178,26 +161,26 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Be_Able_To_Query_With_Predicate()
         {
             var g = DseGraph.Traversal(Session);
-            var edges = g.E().HasLabel("knows").Has("weight", P.Gte(0.5f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 2, "knows");
+            var edges = g.With("allow-filtering").E().HasLabel("knows").Has("weight", P.Gte(0.5f)).ToList();
+            TraversalCoreIntegrationTest.VerifyEdgeResults(edges, 2, "knows");
 
-            edges = g.E().HasLabel("knows").Has("weight", P.Between(0.4f, 0.6f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
+            edges = g.With("allow-filtering").E().HasLabel("knows").Has("weight", P.Between(0.4f, 0.6f)).ToList();
+            TraversalCoreIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
 
-            edges = g.E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
+            edges = g.With("allow-filtering").E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
+            TraversalCoreIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
 
-            edges = g.E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
+            edges = g.With("allow-filtering").E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
+            TraversalCoreIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
 
-            var vertices = g.V().HasLabel("person").Has("name", P.Eq("marko")).ToList();
-            TraversalIntegrationTest.VerifyVertexResults(vertices, 1, "person");
+            var vertices = g.With("allow-filtering").V().HasLabel("person").Has("name", P.Eq("marko")).ToList();
+            TraversalCoreIntegrationTest.VerifyVertexResults(vertices, 1, "person");
 
-            vertices = g.V().HasLabel("person").Has("name", P.Neq("marko")).ToList();
-            TraversalIntegrationTest.VerifyVertexResults(vertices, 3, "person");
+            vertices = g.With("allow-filtering").V().HasLabel("person").Has("name", P.Neq("marko")).ToList();
+            TraversalCoreIntegrationTest.VerifyVertexResults(vertices, 3, "person");
 
-            vertices = g.V().HasLabel("person").Has("name", P.Within("marko", "josh", "john")).ToList();
-            TraversalIntegrationTest.VerifyVertexResults(vertices, 2, "person");
+            vertices = g.With("allow-filtering").V().HasLabel("person").Has("name", P.Within("marko", "josh", "john")).ToList();
+            TraversalCoreIntegrationTest.VerifyVertexResults(vertices, 2, "person");
         }
 
         private static void VerifyEdgeResults(IList<Gremlin.Net.Structure.Edge> edges, int count, string label)
@@ -256,7 +239,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             g.AddV("character").Property("name", name).Property("age", 20).Next();
             var knowsNothing = g.V().HasLabel("character").Has("name", name).ToList();
             Assert.AreEqual(1, knowsNothing.Count);
-            g.V().HasLabel("character").Has("name", P.Eq(name)).Drop().ToList();
+            g.With("force-vertex-deletion").V().HasLabel("character").Has("name", P.Eq(name)).Drop().ToList();
             knowsNothing = g.V().HasLabel("character").Has("name", P.Eq(name)).ToList();
             Assert.AreEqual(0, knowsNothing.Count);
         }
@@ -270,7 +253,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
                 .Property("multi_prop", "the")
                 .Property("multi_prop", "door")
                 .Next();
-            StatementIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
+            StatementClassicIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
             g.V().HasLabel("multi_v").Drop().Next();
         }
 
@@ -281,7 +264,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             g.AddV("meta_v")
                 .Property("meta_prop", "White Walkers", "sub_prop", "Dragonglass", "sub_prop2", "Valyrian steel")
                 .Next();
-            StatementIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
+            StatementClassicIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
             g.V().HasLabel("meta_v").Drop().Next();
         }
 
@@ -289,7 +272,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Handle_Result_With_Mixed_Object()
         {
             var g = DseGraph.Traversal(Session);
-            var result = g.V().HasLabel("software")
+            var result = g.With("allow-filtering").V().HasLabel("software")
                 .As("a", "b", "c")
                 .Select<object>("a", "b", "c")
                 .By("name")
@@ -316,7 +299,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Execute_Trasversal_With_Enums()
         {
             var g = DseGraph.Traversal(Session);
-            var enums = g.V().HasLabel("person").Has("age").Order().By("age", Order.Decr).ToList();
+            var enums = g.With("allow-filtering").V().HasLabel("person").Has("age").Order().By("age", Order.Decr).ToList();
             Assert.AreEqual(4, enums.Count);
         }
 
