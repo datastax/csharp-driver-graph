@@ -18,11 +18,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cassandra.DataStax.Graph.Test.Integration.TestClusterManagement;
 using Gremlin.Net.Process.Traversal;
 using NUnit.Framework;
 
 namespace Cassandra.DataStax.Graph.Test.Integration
 {
+    [TestDseVersion(6, 8)]
     public class StatementCoreIntegrationTest : BaseIntegrationTest
     {
         public StatementCoreIntegrationTest() : base(BaseIntegrationTest.DefaultCoreGraphName)

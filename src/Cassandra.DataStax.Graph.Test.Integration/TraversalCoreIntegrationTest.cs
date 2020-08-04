@@ -26,6 +26,7 @@ using NUnit.Framework;
 
 namespace Cassandra.DataStax.Graph.Test.Integration
 {
+    [TestDseVersion(6, 8)]
     public class TraversalCoreIntegrationTest : BaseIntegrationTest
     {
         private static readonly Tuple<string, object>[] PropertyItems =
