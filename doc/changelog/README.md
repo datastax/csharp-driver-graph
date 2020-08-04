@@ -2,6 +2,14 @@
 
 Changelog for the DataStax C# Graph Extension.
 
+## 2.2.0
+
+TBD
+
+### Features
+
+*   [[CSHARP-923](https://datastax-oss.atlassian.net/browse/CSHARP-923)] - Graph Fluent API: Add support for DSE 6.8
+
 ## 2.1.1
 
 2020-05-12
