@@ -250,24 +250,37 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         {
             var g = DseGraph.Traversal(Session);
             g.AddV("multi_v")
-                .Property("multi_prop", "Hold")
-                .Property("multi_prop", "the")
-                .Property("multi_prop", "door")
+                .Property("pk", Guid.NewGuid())
+                .Property("multi_prop", new List<string> { "Hold" , "the", "door"})
                 .Next();
-            StatementClassicIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
+            StatementCoreIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
             g.V().HasLabel("multi_v").Drop().Next();
         }
 
         [Test]
-        public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
+        public void Should_Be_Able_To_Create_Vertex_With_CollectionProperties()
         {
             var g = DseGraph.Traversal(Session);
             g.AddV("meta_v")
-                .Property("meta_prop", "White Walkers", "sub_prop", "Dragonglass", "sub_prop2", "Valyrian steel")
+                .Property("meta_prop", "White Walkers")
+                .Property("sub_prop", new List<string> { "Dragonglass" })
+                .Property("sub_prop2", new List<string> { "Valyrian steel" })
                 .Next();
-            StatementClassicIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
+            StatementCoreIntegrationTest.VerifyCollectionProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
             g.V().HasLabel("meta_v").Drop().Next();
         }
+
+        // TODO GRAPH UDTs
+        //[Test]
+        //public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
+        //{
+        //    var g = DseGraph.Traversal(Session);
+        //    g.AddV("meta_v")
+        //        .Property("meta_prop", "White Walkers", "sub_prop", "Dragonglass", "sub_prop2", "Valyrian steel")
+        //        .Next();
+        //    StatementClassicIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
+        //    g.V().HasLabel("meta_v").Drop().Next();
+        //}
 
         [Test]
         public void Should_Handle_Result_With_Mixed_Object()
