@@ -151,7 +151,7 @@ def installDependencies() {
         }
         export -f nuget
 
-        nuget install NUnit.Runners -Version 3.6.1 -OutputDirectory testrunner
+        nuget install NUnit.Runners -Version 3.11.1 -OutputDirectory testrunner
       '''
     }
   }
@@ -204,7 +204,7 @@ def executeUnitTests(perCommitSchedule) {
           . ${HOME}/environment.txt
           set +o allexport
 
-          mono ./testrunner/NUnit.ConsoleRunner.3.6.1/tools/nunit3-console.exe src/Cassandra.DataStax.Graph.Test.Unit/bin/Release/net461/Cassandra.DataStax.Graph.Test.Unit.dll --where "cat != long && cat != memory" --labels=All --result:"TestResultUnit_nunit.xml"
+          mono ./testrunner/NUnit.ConsoleRunner.3.11.1/tools/nunit3-console.exe src/Cassandra.DataStax.Graph.Test.Unit/bin/Release/net461/Cassandra.DataStax.Graph.Test.Unit.dll --where "cat != long && cat != memory" --labels=All --result:"TestResultUnit_nunit.xml"
         '''
       }
       sh label: 'Convert the test results using saxon', script: '''#!/bin/bash -le
@@ -250,7 +250,7 @@ def executeIntegrationTests(perCommitSchedule) {
           . ${HOME}/environment.txt
           set +o allexport
 
-          mono ./testrunner/NUnit.ConsoleRunner.3.6.1/tools/nunit3-console.exe src/Cassandra.DataStax.Graph.Test.Integration/bin/Release/net461/Cassandra.DataStax.Graph.Test.Integration.dll --where "cat != long && cat != memory" --labels=All --result:"TestResultIntegration_nunit.xml"
+          mono ./testrunner/NUnit.ConsoleRunner.3.11.1/tools/nunit3-console.exe src/Cassandra.DataStax.Graph.Test.Integration/bin/Release/net461/Cassandra.DataStax.Graph.Test.Integration.dll --where "cat != long && cat != memory" --labels=All --result:"TestResultIntegration_nunit.xml"
         '''
       }
       sh label: 'Convert the test results using saxon', script: '''#!/bin/bash -le
