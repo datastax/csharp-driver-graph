@@ -61,8 +61,11 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             "peter.addEdge('created', lop, 'weight', 0.2f);";
         
         protected const string CoreSchemaGremlinQuery =
+            "schema.type('meta_prop_type').property('sub_prop', Text).property('sub_prop2', Text).create()\n" +
+            "schema.vertexLabel('meta_v').partitionBy('pk', UUID).property('meta_prop', typeOf('meta_prop_type')).create()\n" +
             "schema.vertexLabel('multi_v').partitionBy('pk', UUID).property('multi_prop', listOf(Text)).create()\n" +
-            "schema.vertexLabel('meta_v').partitionBy('meta_prop', Text).property('sub_prop', listOf(Text)).property('sub_prop2', listOf(Text)).create()\n" +
+            "schema.vertexLabel('collection_v').partitionBy('pk', Text).property('sub_prop', listOf(Text)).property('sub_prop2', listOf(Text)).create()\n" +
+            "schema.vertexLabel('tuple_v').partitionBy('pk', UUID).property('tuple_prop', tupleOf(Text, Int)).create()\n" +
             "schema.vertexLabel('person').partitionBy('name', Text).property('age', Int).create();\n" +
             "schema.vertexLabel('software').partitionBy('name', Text).property('lang', Text).create();\n" +
             "schema.vertexLabel('character').partitionBy('name', Text).property('age', Int).property('tag', Text).create()\n" +
@@ -138,7 +141,6 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             WaitUntilKeyspaceMetadataRefresh(session, name, false);
             session.ExecuteGraph(new SimpleGraphStatement($"system.graph('{name}').ifNotExists().create()").SetSystemQuery());
             WaitUntilKeyspaceMetadataRefresh(session, name, true);
-            //session.ExecuteGraph(new SimpleGraphStatement(AllowScans).SetGraphName(name));
             session.ExecuteGraph(new SimpleGraphStatement(CoreSchemaGremlinQuery).SetGraphName(name));
             session.ExecuteGraph(new SimpleGraphStatement(CoreLoadGremlinQuery).SetGraphName(name));
         }

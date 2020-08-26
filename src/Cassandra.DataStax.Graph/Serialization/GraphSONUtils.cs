@@ -27,6 +27,7 @@ namespace Cassandra.DataStax.Graph.Serialization
 
         static GraphSONUtils()
         {
+            // graph type serializer instances will be reused by the core driver if the same inner dictionary reference is used
             GraphSONUtils.CustomSerializers = new Dictionary<GraphProtocol, IReadOnlyDictionary<Type, IGraphSONSerializer>>
             {
                 { GraphProtocol.GraphSON2, GraphSON2Serializers.CustomSerializers},

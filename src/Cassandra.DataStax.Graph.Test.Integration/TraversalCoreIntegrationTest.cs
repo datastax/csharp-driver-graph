@@ -260,27 +260,47 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         [Test]
         public void Should_Be_Able_To_Create_Vertex_With_CollectionProperties()
         {
+            Session.UserDefinedTypes.Define(UdtMap.For<MetaProp>("meta_prop_type", GraphName)
+                .Map(u => u.SubProp, "sub_prop").Map(u => u.SubProp2, "sub_prop2"));
             var g = DseGraph.Traversal(Session);
-            g.AddV("meta_v")
-                .Property("meta_prop", "White Walkers")
+            g.AddV("collection_v")
+                .Property("pk", "White Walkers")
                 .Property("sub_prop", new List<string> { "Dragonglass" })
                 .Property("sub_prop2", new List<string> { "Valyrian steel" })
                 .Next();
             StatementCoreIntegrationTest.VerifyCollectionProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
-            g.V().HasLabel("meta_v").Drop().Next();
+            g.V().HasLabel("collection_v").Drop().Next();
         }
 
-        // TODO GRAPH UDTs
-        //[Test]
-        //public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
-        //{
-        //    var g = DseGraph.Traversal(Session);
-        //    g.AddV("meta_v")
-        //        .Property("meta_prop", "White Walkers", "sub_prop", "Dragonglass", "sub_prop2", "Valyrian steel")
-        //        .Next();
-        //    StatementClassicIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
-        //    g.V().HasLabel("meta_v").Drop().Next();
-        //}
+        [Test]
+        public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
+        {
+            var g = DseGraph.Traversal(Session);
+            var guid = Guid.NewGuid();
+            var metaProp = new MetaProp { SubProp = "Dragonglass", SubProp2 = "Valyrian steel" };
+            g.AddV("meta_v")
+                .Property("pk", guid)
+                .Property("meta_prop", metaProp)
+                .Next();
+
+            StatementCoreIntegrationTest.VerifyMetaProperties(Session, g, guid, metaProp);
+            g.V().HasLabel("meta_v").Drop().Next();
+        }
+        
+        [Test]
+        public void Should_Be_Able_To_Create_Vertex_With_TupleProperties()
+        {
+            var g = DseGraph.Traversal(Session);
+            var tuple = new Tuple<string, int>("test 123", 123);
+            var guid = Guid.NewGuid();
+            g.AddV("tuple_v")
+                .Property("pk", guid)
+                .Property("tuple_prop", tuple)
+                .Next();
+
+            StatementCoreIntegrationTest.VerifyProperty(Session, g, "tuple_v", guid, "tuple_prop", tuple);
+            g.V().HasLabel("tuple_v").Drop().Next();
+        }
 
         [Test]
         public void Should_Handle_Result_With_Mixed_Object()

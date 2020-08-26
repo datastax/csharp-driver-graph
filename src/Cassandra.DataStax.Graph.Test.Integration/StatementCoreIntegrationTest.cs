@@ -116,28 +116,48 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Be_Able_To_Create_Vertex_With_CollectionProperties()
         {
             var g = DseGraph.Traversal(Session);
-            var stmt = DseGraph.StatementFromTraversal(g.AddV("meta_v")
-                .Property("meta_prop", "What can kill a dragon")
+            var stmt = DseGraph.StatementFromTraversal(g.AddV("collection_v")
+                .Property("pk", "What can kill a dragon")
                 .Property("sub_prop", new List<string> { "Qyburn's scorpion" })
                 .Property("sub_prop2", new List<string> { "Another dragon" }));
             Session.ExecuteGraph(stmt);
             StatementCoreIntegrationTest.VerifyCollectionProperties(Session, g, "What can kill a dragon", "Qyburn's scorpion", "Another dragon");
+            var dropstmt = DseGraph.StatementFromTraversal(g.V().HasLabel("collection_v").Drop());
+            Session.ExecuteGraph(dropstmt);
+        }
+
+        [Test]
+        public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
+        {
+            Session.UserDefinedTypes.Define(UdtMap.For<MetaProp>("meta_prop_type", GraphName)
+                .Map(u => u.SubProp, "sub_prop").Map(u => u.SubProp2, "sub_prop2"));
+            var g = DseGraph.Traversal(Session);
+            var guid = Guid.NewGuid();
+            var metaProp = new MetaProp { SubProp = "Qyburn's scorpion", SubProp2 = "Another dragon" };
+            var stmt = DseGraph.StatementFromTraversal(g.AddV("meta_v")
+                .Property("pk", guid)
+                .Property("meta_prop", metaProp));
+            Session.ExecuteGraph(stmt);
+            StatementCoreIntegrationTest.VerifyMetaProperties(Session, g, guid, metaProp);
             var dropstmt = DseGraph.StatementFromTraversal(g.V().HasLabel("meta_v").Drop());
             Session.ExecuteGraph(dropstmt);
         }
 
-        // TODO GRAPH (UDT)
-        //[Test]
-        //public void Should_Be_Able_To_Create_Vertex_With_MetaProperties()
-        //{
-        //    var g = DseGraph.Traversal(Session);
-        //    var stmt = DseGraph.StatementFromTraversal(g.AddV("meta_v")
-        //        .Property("meta_prop", "What can kill a dragon", "sub_prop", "Qyburn's scorpion", "sub_prop2", "Another dragon"));
-        //    Session.ExecuteGraph(stmt);
-        //    StatementCoreIntegrationTest.VerifyMetaProperties(Session, g, "What can kill a dragon", "Qyburn's scorpion", "Another dragon");
-        //    var dropstmt = DseGraph.StatementFromTraversal(g.V().HasLabel("meta_v").Drop());
-        //    Session.ExecuteGraph(dropstmt);
-        //}
+        [Test]
+        public void Should_Be_Able_To_Create_Vertex_With_TupleProperties()
+        {
+            var g = DseGraph.Traversal(Session);
+            var tuple = new Tuple<string, int>("test 12345", 12345);
+            var guid = Guid.NewGuid();
+            var stmt = DseGraph.StatementFromTraversal(g.AddV("tuple_v")
+                .Property("pk", guid)
+                .Property("tuple_prop", tuple));
+            Session.ExecuteGraph(stmt);
+
+            StatementCoreIntegrationTest.VerifyProperty(Session, g, "tuple_v", guid, "tuple_prop", tuple);
+            var dropstmt = DseGraph.StatementFromTraversal(g.V().HasLabel("tuple_v").Drop());
+            Session.ExecuteGraph(dropstmt);
+        }
 
         [Test]
         public void Should_Make_OLAP_Query_Using_Statement()
@@ -159,35 +179,38 @@ namespace Cassandra.DataStax.Graph.Test.Integration
 
         public static void VerifyCollectionProperties(ISession session, GraphTraversalSource g, string meta, string sub1, string sub2)
         {
-            var stmt = DseGraph.StatementFromTraversal(g.V().HasLabel("meta_v"));
+            var stmt = DseGraph.StatementFromTraversal(g.V().HasLabel("collection_v"));
             var walkers = session.ExecuteGraph(stmt);
             var result = walkers.FirstOrDefault();
             Assert.IsNotNull(result);
             var nightKing = result.ToVertex();
-            Assert.AreEqual("meta_v", nightKing.Label);
+            Assert.AreEqual("collection_v", nightKing.Label);
             TestHelper.FillVertexProperties(session, nightKing);
-            var metaProp = nightKing.GetProperty("meta_prop").Value.To<string>();
+            var metaProp = nightKing.GetProperty("pk").Value.To<string>();
             Assert.AreEqual(meta, metaProp);
             CollectionAssert.AreEqual(new [] { sub1 }, nightKing.GetProperty("sub_prop").Value.To<IEnumerable<string>>());
             CollectionAssert.AreEqual(new [] { sub2 }, nightKing.GetProperty("sub_prop2").Value.To<IEnumerable<string>>());
         }
 
-        // TODO GRAPH UDT
-        //public static void VerifyMetaProperties(ISession session, GraphTraversalSource g, string meta, string sub1, string sub2)
-        //{
-        //    var stmt = DseGraph.StatementFromTraversal(g.V().HasLabel("meta_v"));
-        //    var walkers = session.ExecuteGraph(stmt);
-        //    var result = walkers.FirstOrDefault();
-        //    Assert.IsNotNull(result);
-        //    var nightKing = result.ToVertex();
-        //    Assert.AreEqual("meta_v", nightKing.Label);
-        //    var properties = nightKing.Properties["meta_prop"].ToArray();
-        //    Assert.AreEqual(1, properties.Length);
-        //    Assert.AreEqual(meta, properties[0].Get<string>("value"));
-        //    var subProperties = properties[0].Get<IDictionary<string, string>>("properties");
-        //    Assert.AreEqual(sub1, subProperties["sub_prop"]);
-        //    Assert.AreEqual(sub2, subProperties["sub_prop2"]);
-        //}
+        public static void VerifyMetaProperties(ISession session, GraphTraversalSource g, Guid pk, MetaProp metaProp)
+        {
+            var stmt = DseGraph.StatementFromTraversal(g.V().HasLabel("meta_v"));
+            var walkers = session.ExecuteGraph(stmt);
+            var result = walkers.FirstOrDefault();
+            Assert.IsNotNull(result);
+            var nightKing = result.ToVertex();
+            TestHelper.FillVertexProperties(session, nightKing);
+            Assert.AreEqual("meta_v", nightKing.Label);
+            var dbPk = nightKing.GetProperty("pk").Value.To<Guid>();
+            var dbMetaProp = nightKing.GetProperty("meta_prop").Value.To<MetaProp>();
+            Assert.AreEqual(pk, dbPk);
+            Assert.AreEqual(metaProp.SubProp, dbMetaProp.SubProp);
+            Assert.AreEqual(metaProp.SubProp2, dbMetaProp.SubProp2);
+            
+            var dbMetaPropDict = nightKing.GetProperty("meta_prop").Value.To<IDictionary<string, string>>();
+            Assert.AreEqual(metaProp.SubProp, dbMetaPropDict["sub_prop"]);
+            Assert.AreEqual(metaProp.SubProp2, dbMetaPropDict["sub_prop2"]);
+        }
 
         public static void VerifyMultiCardinalityProperty(ISession session, GraphTraversalSource g, string[] values)
         {
@@ -201,6 +224,21 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             var properties = multiPropertyVertex.GetProperty("multi_prop").Value.To<IList<string>>();
             Assert.AreEqual(values.Length, properties.Count);
             CollectionAssert.AreEqual(values, properties);
+        }
+        public static void VerifyProperty<TProp>(
+            ISession session, GraphTraversalSource g, string vertexLabel, Guid pk, string prop, TProp value)
+        {
+            var stmt = DseGraph.StatementFromTraversal(g.V().HasLabel(vertexLabel));
+            var walkers = session.ExecuteGraph(stmt);
+            var result = walkers.FirstOrDefault();
+            Assert.IsNotNull(result);
+            var vertex = result.ToVertex();
+            TestHelper.FillVertexProperties(session, vertex);
+            Assert.AreEqual(vertexLabel, vertex.Label);
+            var dbPk = vertex.GetProperty("pk").Value.To<Guid>();
+            var dbProp = vertex.GetProperty(prop).Value.To<TProp>();
+            Assert.AreEqual(pk, dbPk);
+            Assert.AreEqual(value, dbProp);
         }
     }
 }
