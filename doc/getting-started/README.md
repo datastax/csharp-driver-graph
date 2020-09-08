@@ -1,7 +1,10 @@
 # Getting started
 
-The `CassandraCSharpDriver.Graph` package leverages the features of [Gremlin.Net language variant][glv] and the high-level client driver
-features of the [DataStax C# Driver for Apache Cassandra][driver].
+The `CassandraCSharpDriver.Graph` package leverages the features of [Gremlin.Net language variant][glv] and the high-level client driver features of the [DataStax C# Driver for Apache Cassandra][driver].
+
+This package provides the `fluent` API and the core driver package (`CassandraCSharpDriver`) provides the `script` API. For more information about the `script` API, see [the `Graph Support` section of the core driver documentation][graph-support]. That section of the core driver documentation covers some topics that are not covered here so it's recommended to read it as well.
+
+If you are using DSE 6.8+ and you are running into server errors related to the `GraphSON` version, then please take a look at [the `DataStax Graph and the Core Engine (DSE 6.8+)` section of the core driver documentation][core-engine].
 
 ```c#
 using Cassandra;
@@ -9,9 +12,8 @@ using Cassandra.DataStax.Graph;
 using Gremlin.Net;
 ```
 
-To start building traversals, you will need a `ISession` instance that represents a pool of connections to your
-DSE cluster.
- 
+To start building traversals, you will need a `ISession` instance that represents a pool of connections to your DSE cluster.
+
 ```c#
 ICluster cluster = Cluster.Builder()
                                 .AddContactPoint("127.0.0.1")
@@ -19,8 +21,7 @@ ICluster cluster = Cluster.Builder()
 ISession session = cluster.Connect();
 ```
 
-`ISession` instances of the [DataStax C# Driver for Apache Cassandra][driver] are designed to be long-lived and you should normally
-reuse it during your application lifetime.
+`ISession` instances of the [DataStax C# Driver for Apache Cassandra][driver] are designed to be long-lived and you should normally reuse it during your application lifetime.
 
 You can use your `ISession` instances to obtain `GraphTraversalSource` instances.
 
@@ -48,8 +49,7 @@ var statement = DseGraph.StatementFromTraversal(g.V().HasLabel("person"));
 GraphResultSet result = session.ExecuteGraph(statement);
 ```
 
-You can benefit from the extension method on the `Cassandra.DataStax.Graph` namespace to call `ExecuteGraph()` using the traversal,
-without the need to manually convert it:
+You can benefit from the extension method on the `Cassandra.DataStax.Graph` namespace to call `ExecuteGraph()` using the traversal, without the need to manually convert it:
 
 ```c#
 GraphResultSet result = session.ExecuteGraph(g.V().HasLabel("person"));
@@ -67,8 +67,7 @@ foreach (IVertex vertex in result.To<IVertex>())
 ### Implicit execution
 
 Traversals can be executed on the server using the methods that represents [Gremlin terminal steps][gremlin-terminal].
-In the case of Gremlin.Net variant, those are `ToList()`, `ToSet()`, `Next()`, `NextTraverser()` and `Iterate()`, 
-along with `Promise()` for async traversal execution.
+In the case of Gremlin.Net variant, those are `ToList()`, `ToSet()`, `Next()`, `NextTraverser()` and `Iterate()`, along with `Promise()` for async traversal execution.
 
 The types returned from this type of execution will be `Gremlin.Net` types.
 
@@ -79,8 +78,7 @@ IList<Vertex> people = g.V().HasLabel("person").ToList();
 
 ## Enums, Static Methods and the Anonymous Traversal
 
-Gremlin has various tokens (ie: `T`, `P`, `Order`, ...) that are represented in Gremlin.Net as
-classes and [enums][enum].
+Gremlin has various tokens (ie: `T`, `P`, `Order`, ...) that are represented in Gremlin.Net as classes and [enums][enum].
 
 ```c#
 g.V().HasLabel("person").Has("age", P.Gt(36))
@@ -99,8 +97,7 @@ Then it is possible to represent the above traversal as below.
 g.V().HasLabel("person").Has("age", Gt(36))
 ```
 
-Finally, the anonymous traversal is exposed in the class `__` that can be statically imported, allowing 
-to be expressed as below:
+Finally, the anonymous traversal is exposed in the class `__` that can be statically imported, allowing to be expressed as below:
 
 ```c#
 using static Gremlin.Net.Process.Traversal.__;
@@ -116,10 +113,19 @@ g.V().Repeat(Out()).Times(2).Values<string>("name").Fold()
 [As explained in the C# driver docs][graph-options], the graph options can be defined when initializing the
 cluster, making them the defaults for all graph executions.
 
-```c#
-var cluster = Cluster.Builder()
+```csharp
+// with the legacy configuration method
+ICluster cluster = Cluster.Builder()
     .AddContactPoint("127.0.0.1")
     .WithGraphOptions(new GraphOptions().SetName("demo"))
+    .Build();
+
+// with execution profiles
+ICluster cluster = Cluster.Builder()
+    .AddContactPoint("127.0.0.1")
+    .WithExecutionProfiles(opt => opt
+        .WithProfile("default", profile => profile
+            .WithGraphOptions(new GraphOptions().SetName("demo"))))
     .Build();
 ```
 
@@ -139,3 +145,5 @@ That way all traversals created from the `GraphTraversalSource` instance will be
 [enum]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/enum
 [using-static]: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-static
 [graph-options]: http://docs.datastax.com/en/developer/csharp-driver/latest/features/graph-support/#graph-options
+[graph-support]: http://docs.datastax.com/en/developer/csharp-driver/latest/features/graph-support
+[core-engine]: http://docs.datastax.com/en/developer/csharp-driver/latest/features/graph-support#datastax-graph-and-the-core-engine-dse-68

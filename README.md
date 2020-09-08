@@ -1,7 +1,6 @@
 # DataStax C# Graph Extension
 
-This package builds on the [DataStax C# Driver for Apache Cassandra][driver], adding functionality for interacting
-with DataStax graph features using [Apache TinkerPop][tinkerpop] [Gremlin.Net][gremlin-dotnet].
+This package builds on the [DataStax C# Driver for Apache Cassandra][driver], adding a fluent API for interacting with DataStax graph features using [Apache TinkerPop][tinkerpop] [Gremlin.Net][gremlin-dotnet].
 
 This library supports .NET Framework 4.6.1+ and .NET Core 2.1+.
 
