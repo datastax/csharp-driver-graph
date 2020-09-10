@@ -2,7 +2,7 @@
 
 The `CassandraCSharpDriver.Graph` package leverages the features of [Gremlin.Net language variant][glv] and the high-level client driver features of the [DataStax C# Driver for Apache Cassandra][driver].
 
-This package provides the `fluent` API and the core driver package (`CassandraCSharpDriver`) provides the `script` API. For more information about the `script` API, see [the `Graph Support` section of the core driver documentation][graph-support]. That section of the core driver documentation covers some topics that are not covered here so it's recommended to read it as well.
+This package provides the `fluent`, builder-like API for graph traversal execution while the core driver package (`CassandraCSharpDriver`) supports gremlin traversal string execution. For more information about the gremlin traversal string execution API, see [the `Graph Support` section of the core driver documentation][graph-support]. That section of the core driver documentation covers some topics that are not covered here so it's recommended to read it as well.
 
 If you are using DSE 6.8+ and you are running into server errors related to the `GraphSON` version, then please take a look at [the `DataStax Graph and the Core Engine (DSE 6.8+)` section of the core driver documentation][core-engine].
 
