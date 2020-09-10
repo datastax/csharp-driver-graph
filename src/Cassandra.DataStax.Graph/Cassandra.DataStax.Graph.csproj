@@ -21,7 +21,7 @@
     <PackageProjectUrl>http://docs.datastax.com/en/developer/csharp-dse-graph/latest/</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CassandraCSharpDriver" Version="3.15.1-graph9" />
+    <PackageReference Include="CassandraCSharpDriver" Version="3.16.0" />
     <PackageReference Include="Gremlin.Net" Version="[3.4.7]" />
   </ItemGroup>
 </Project>

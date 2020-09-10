@@ -176,7 +176,7 @@ def buildDriver() {
       '''
       sh label: "Install required packages and build the driver for ${env.DOTNET_VERSION}", script: '''#!/bin/bash -le
         dotnet restore src || true
-        dotnet restore src --source https://joao-r-reis.pkgs.visualstudio.com/nugetfeed/_packaging/projectfeed/nuget/v3/index.json --source https://api.nuget.org/v3/index.json
+        dotnet restore src
       '''
     }
   }
