@@ -22,8 +22,12 @@ using NUnit.Framework;
 
 namespace Cassandra.DataStax.Graph.Test.Integration
 {
-    public class StatementIntegrationTest : BaseIntegrationTest
+    public class StatementClassicIntegrationTest : BaseIntegrationTest
     {
+        public StatementClassicIntegrationTest() : base(BaseIntegrationTest.DefaultClassicGraphName)
+        {
+        }
+
         [Test]
         public async Task Should_Create_A_Query_From_A_Traversal()
         {
@@ -32,8 +36,8 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             var rs = await Session.ExecuteGraphAsync(statement);
             var rsSync = Session.ExecuteGraph(statement);
             // The result should be DSE driver vertices
-            StatementIntegrationTest.VerifyGraphResultSet(rs);
-            StatementIntegrationTest.VerifyGraphResultSet(rsSync);
+            StatementClassicIntegrationTest.VerifyGraphResultSet(rs);
+            StatementClassicIntegrationTest.VerifyGraphResultSet(rsSync);
         }
 
         [Test]
@@ -43,8 +47,8 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             var rs = await Session.ExecuteGraphAsync(g.V().HasLabel("person").Has("name", P.Eq("marko")));
             var rsSync = Session.ExecuteGraph(g.V().HasLabel("person").Has("name", P.Eq("marko")));
             // The result should be DSE driver vertices
-            StatementIntegrationTest.VerifyGraphResultSet(rs);
-            StatementIntegrationTest.VerifyGraphResultSet(rsSync);
+            StatementClassicIntegrationTest.VerifyGraphResultSet(rs);
+            StatementClassicIntegrationTest.VerifyGraphResultSet(rsSync);
         }
 
         private static void VerifyGraphResultSet(GraphResultSet rs)
@@ -100,7 +104,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             }
             var stmt = DseGraph.StatementFromTraversal(addVertext);
             Session.ExecuteGraph(stmt);
-            StatementIntegrationTest.VerifyMultiCardinalityProperty(Session, g, direwolves);
+            StatementClassicIntegrationTest.VerifyMultiCardinalityProperty(Session, g, direwolves);
             g.V().HasLabel("multi_v").Drop().Next();
         }
 
@@ -111,7 +115,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             var stmt = DseGraph.StatementFromTraversal(g.AddV("meta_v")
                 .Property("meta_prop", "What can kill a dragon", "sub_prop", "Qyburn's scorpion", "sub_prop2", "Another dragon"));
             Session.ExecuteGraph(stmt);
-            StatementIntegrationTest.VerifyMetaProperties(Session, g, "What can kill a dragon", "Qyburn's scorpion", "Another dragon");
+            StatementClassicIntegrationTest.VerifyMetaProperties(Session, g, "What can kill a dragon", "Qyburn's scorpion", "Another dragon");
             var dropstmt = DseGraph.StatementFromTraversal(g.V().HasLabel("meta_v").Drop());
             Session.ExecuteGraph(dropstmt);
         }

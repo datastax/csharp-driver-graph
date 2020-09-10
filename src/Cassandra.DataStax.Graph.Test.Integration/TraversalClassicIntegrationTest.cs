@@ -26,7 +26,7 @@ using NUnit.Framework;
 
 namespace Cassandra.DataStax.Graph.Test.Integration
 {
-    public class TraversalIntegrationTest : BaseIntegrationTest
+    public class TraversalClassicIntegrationTest : BaseIntegrationTest
     {
         private static readonly Tuple<string, object>[] PropertyItems =
         {
@@ -46,19 +46,21 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         [OneTimeSetUp]
         public void FixtureSetup()
         {
-            foreach (var type in TraversalIntegrationTest.PropertyItems.Select(i => i.Item1).Distinct())
+            foreach (var type in TraversalClassicIntegrationTest.PropertyItems.Select(i => i.Item1).Distinct())
             {
                 var typeDef = $"{type}()";
                 if (TestClusterManager.DseVersion >= new Version(5, 1))
-                switch (type)
                 {
-                    case "Point":
-                        typeDef = $"{type}().withBounds(-40, -40, 40, 40)";
-                        break;
-                    case "Linestring":
-                    case "Polygon":
-                        typeDef = $"{type}().withGeoBounds()";
-                        break;
+                    switch (type)
+                    {
+                        case "Point":
+                            typeDef = $"{type}().withBounds(-40, -40, 40, 40)";
+                            break;
+                        case "Linestring":
+                        case "Polygon":
+                            typeDef = $"{type}().withGeoBounds()";
+                            break;
+                    }
                 }
                 else
                 {
@@ -130,7 +132,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         public void Should_Handle_Types(string type)
         {
             var g = DseGraph.Traversal(Session);
-            foreach (var value in TraversalIntegrationTest.PropertyItems.Where(i => i.Item1 == type).Select(i => i.Item2))
+            foreach (var value in TraversalClassicIntegrationTest.PropertyItems.Where(i => i.Item1 == type).Select(i => i.Item2))
             {
                 var vertexLabel = $"vertex{type}";
                 var propertyName = $"prop{type}";
@@ -177,25 +179,25 @@ namespace Cassandra.DataStax.Graph.Test.Integration
         {
             var g = DseGraph.Traversal(Session);
             var edges = g.E().HasLabel("knows").Has("weight", P.Gte(0.5f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 2, "knows");
+            TraversalClassicIntegrationTest.VerifyEdgeResults(edges, 2, "knows");
 
             edges = g.E().HasLabel("knows").Has("weight", P.Between(0.4f, 0.6f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
+            TraversalClassicIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
 
             edges = g.E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
+            TraversalClassicIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
 
             edges = g.E().HasLabel("knows").Has("weight", P.Eq(0.5f)).ToList();
-            TraversalIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
+            TraversalClassicIntegrationTest.VerifyEdgeResults(edges, 1, "knows");
 
             var vertices = g.V().HasLabel("person").Has("name", P.Eq("marko")).ToList();
-            TraversalIntegrationTest.VerifyVertexResults(vertices, 1, "person");
+            TraversalClassicIntegrationTest.VerifyVertexResults(vertices, 1, "person");
 
             vertices = g.V().HasLabel("person").Has("name", P.Neq("marko")).ToList();
-            TraversalIntegrationTest.VerifyVertexResults(vertices, 3, "person");
+            TraversalClassicIntegrationTest.VerifyVertexResults(vertices, 3, "person");
 
             vertices = g.V().HasLabel("person").Has("name", P.Within("marko", "josh", "john")).ToList();
-            TraversalIntegrationTest.VerifyVertexResults(vertices, 2, "person");
+            TraversalClassicIntegrationTest.VerifyVertexResults(vertices, 2, "person");
         }
 
         private static void VerifyEdgeResults(IList<Gremlin.Net.Structure.Edge> edges, int count, string label)
@@ -268,7 +270,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
                 .Property("multi_prop", "the")
                 .Property("multi_prop", "door")
                 .Next();
-            StatementIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
+            StatementClassicIntegrationTest.VerifyMultiCardinalityProperty(Session, g, new []{ "Hold" , "the", "door"});
             g.V().HasLabel("multi_v").Drop().Next();
         }
 
@@ -279,7 +281,7 @@ namespace Cassandra.DataStax.Graph.Test.Integration
             g.AddV("meta_v")
                 .Property("meta_prop", "White Walkers", "sub_prop", "Dragonglass", "sub_prop2", "Valyrian steel")
                 .Next();
-            StatementIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
+            StatementClassicIntegrationTest.VerifyMetaProperties(Session, g, "White Walkers", "Dragonglass", "Valyrian steel");
             g.V().HasLabel("meta_v").Drop().Next();
         }
 

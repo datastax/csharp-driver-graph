@@ -34,7 +34,10 @@ api_docs:
   1.2: http://docs.datastax.com/en/drivers/csharp-dse-graph/1.2/
   2.0: http://docs.datastax.com/en/drivers/csharp-dse-graph/2.0/
   2.1: http://docs.datastax.com/en/drivers/csharp-dse-graph/2.1/
+  2.2: http://docs.datastax.com/en/drivers/csharp-dse-graph/2.2/
 versions:
+  - name: '2.2'
+    ref: '2.2'
   - name: '2.1'
     ref: '2.1'
   - name: '2.0'
