@@ -64,6 +64,15 @@ foreach (IVertex vertex in result.To<IVertex>())
 }
 ```
 
+With Datastax Graph Core Engine (DSE 6.8+), you are often required to use the `elementMap()` step to obtain vertices with their properties and in this case `To<IVertex>()` won't work because the returned objects are not of the type `Vertex`. For this specific case, there is an `ElementMap` C# class that can be easier to manipulate than the default `Dictionary<IGraphNode,IGraphNode>` that is used when deserializing results from `elementMap()` queries.
+
+```csharp
+foreach (ElementMap elementMap in result.To<ElementMap>())
+{
+    Console.WriteLine(elementMap.Label);
+}
+```
+
 ### Implicit execution
 
 Traversals can be executed on the server using the methods that represents [Gremlin terminal steps][gremlin-terminal].
